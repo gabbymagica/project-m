@@ -26,18 +26,24 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("\n\n\n\n\nx0: %d\ny0: %d\n tilex0: %d\n tiley0: %d\n", x0, y0, tileX0, tileY0))
 
-	for y := tileY0; y < tileY0+maxTilesHeight; y++ {
+	for y := tileY0; y <= tileY0+maxTilesHeight; y++ {
 		if y < 0 || y > len(g.Map) {
 			continue
 		}
-		for x := tileX0; x < tileX0+maxTilesWidth; x++ {
+		for x := tileX0; x <= tileX0+maxTilesWidth; x++ {
 			if x < 0 || x > len(g.Map[y]) {
 				continue
 			}
 			tileXPos := float32((x - tileX0) * tileSize)
 			tileYPos := float32((y - tileY0) * tileSize)
-			vector.StrokeLine(screen, tileXPos, tileYPos, tileXPos+float32(g.Tilesize), tileYPos, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0x00}, false)
-			vector.StrokeLine(screen, tileXPos, tileYPos, tileXPos, tileYPos+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0x00}, false)
+			vector.StrokeLine(screen, tileXPos, tileYPos, tileXPos+float32(g.Tilesize), tileYPos, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			vector.StrokeLine(screen, tileXPos, tileYPos, tileXPos, tileYPos+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			if x == len(g.Map[y]) {
+				vector.StrokeLine(screen, tileXPos+float32(g.Tilesize), tileYPos, tileXPos+float32(g.Tilesize), tileYPos+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			}
+			if y == len(g.Map) {
+				vector.StrokeLine(screen, tileXPos, tileYPos+float32(g.Tilesize), tileXPos+float32(g.Tilesize), tileYPos+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			}
 		}
 	}
 }
