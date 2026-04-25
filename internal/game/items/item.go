@@ -2,7 +2,7 @@ package item
 
 import (
 	"project_m/assets"
-	sprite "project_m/engine"
+	sprite "project_m/internal/engine"
 )
 
 

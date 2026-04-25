@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"image/color"
 	"project_m/assets"
-	sprite "project_m/engine"
+	sprite "project_m/internal/engine"
 	"project_m/internal/game/entities"
 	"project_m/internal/game/entities/player"
 	"project_m/internal/inventory"
-	inventoryUi "project_m/ui"
+	inventoryUi "project_m/internal/display/ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -62,11 +62,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 960, 540
+	return 1366, 788
 }
 
 func GameSetup() *Game {
-	ebiten.SetWindowSize(1920, 1080)
+	ebiten.SetWindowSize(1366, 788)
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
@@ -92,13 +92,12 @@ func GameSetup() *Game {
 			
 		),
 		StartX : 20,
-		StartY : 400,
+		StartY : 730,
 		SpriteSlotSize : 64,
-		Spacing: -10,
+		Spacing : 10,
 	}
 
-	inventoryUi.Instantiate()
-	inventoryUi.Scale(0.75, 0.75)
+	inventoryUi.Instantiate(0.75, 0.75)
 
 	game.InventoryUi = inventoryUi
 	return game

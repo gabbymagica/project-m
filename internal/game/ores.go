@@ -1,7 +1,8 @@
-package ores
+package game
+
 
 import (
-	sprite "project_m/engine"
+	sprite "project_m/internal/engine"
 )
 
 type Ore struct {
