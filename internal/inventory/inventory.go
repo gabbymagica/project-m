@@ -1,39 +1,39 @@
 package inventory
 
-type itemInterface interface { } 
+type itemInterface interface{}
 
-type InventoryItem struct {
+type InventorySlot struct {
 	Quantity int
-	Item itemInterface
+	Item     itemInterface
 }
 
 type Inventory struct {
-	Items [10]InventoryItem
+	Items      [10]InventorySlot
 }
 
 func (i *Inventory) AddItem(item itemInterface, quantity int) {
 	for index, inventoryItem := range i.Items {
 		switch inventoryItem.Item {
-			case nil:
-				i.Items[index] = InventoryItem{
-					Quantity: quantity,
-					Item: item,
-				}
-				return
-			case item:
-				i.Items[index].Quantity += quantity 
-				return
+		case nil:
+			i.Items[index] = InventorySlot{
+				Quantity: quantity,
+				Item:     item,
+			}
+			return
+		case item:
+			i.Items[index].Quantity += quantity
+			return
 		}
 	}
 }
 
 func (i *Inventory) RemoveItem(item itemInterface, quantity int) {
 	for index, inventoryItem := range i.Items {
-		if inventoryItem.Item == item  {
+		if inventoryItem.Item == item {
 			if inventoryItem.Quantity > quantity {
-				i.Items[index].Quantity -= quantity 
+				i.Items[index].Quantity -= quantity
 			} else {
-				i.Items[index] = InventoryItem{}
+				i.Items[index] = InventorySlot{}
 			}
 			return
 		}
