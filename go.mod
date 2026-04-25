@@ -1,4 +1,4 @@
-module game_top
+module project_m
 
 go 1.26.2
 
