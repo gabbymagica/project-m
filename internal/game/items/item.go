@@ -5,15 +5,36 @@ import (
 	sprite "project_m/internal/engine"
 )
 
-
 type Item struct {
 	ID 	string
 	Name   string
 	Sprite *sprite.Sprite
 }
 
-func InstanceItem(id string, name string, spritePath string) *Item {
-	Image := assets.LoadImage("items/" + spritePath)
+func (i *Item) Instantiate() *Item {
+	item := *i
+
+	if item.Sprite != nil {
+		item.Sprite = item.Sprite.Instantiate()
+	}
+
+	return &item
+}
+
+func (i *Item) GetSprite() *sprite.Sprite {
+	if i.Sprite == nil {
+		return nil
+	}
+	return i.Sprite
+}
+
+func (i *Item) GetName() string {
+	return i.Name
+}
+
+
+func CreateItem(id string, name string, spritePath string) *Item {
+	Image := assets.LoadImage("ores/" + spritePath)
 
 	return &Item{
 		ID:   id,
@@ -32,6 +53,6 @@ type ItemManager struct {
 
 func NewItemManager() *ItemManager {
 	return &ItemManager{
-		Cobre: InstanceItem("cobre", "Cobre", "cobre.png"),
+		Cobre: CreateItem("cobre", "Cobre", "cobre.png"),
 	}
 }

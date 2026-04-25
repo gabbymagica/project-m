@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"image/color"
 	"project_m/assets"
+	inventoryUi "project_m/internal/display/ui"
 	sprite "project_m/internal/engine"
 	"project_m/internal/game/entities"
 	"project_m/internal/game/entities/player"
+	item "project_m/internal/game/items"
 	"project_m/internal/inventory"
-	inventoryUi "project_m/internal/display/ui"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -71,29 +72,39 @@ func GameSetup() *Game {
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
+	inventory := &inventory.Inventory{}
+
+
 	game.Player = &player.Player{
 		Entity: entities.Entity{
 			Sprite: el_quadrado_vermelho,
 		},
+
+		Inventory: inventory,
 	}
 
-
 	inventoryUi := &inventoryUi.InventoryUI{
-		Data: &inventory.Inventory{},
+		Data: inventory,
 		SpriteSlot: sprite.NewSprite(
 			"slot",
 			"slot",
 			assets.LoadImage("slot.png"),
-			
+
 		),
-		StartX : 20,
-		StartY : 730,
+		StartX : 360,
+		StartY : 720,
 		SpriteSlotSize : 64,
 		Spacing : 10,
 	}
 
-	inventoryUi.Instantiate(0.75, 0.75)
+	inventoryUi.Instantiate(1, 1)
 
 	game.InventoryUi = inventoryUi
+
+	itemManager := item.NewItemManager()
+
+	cobre := itemManager.Cobre.Instantiate()
+
+	inventory.AddItem(cobre, 5)
 	return game
 }

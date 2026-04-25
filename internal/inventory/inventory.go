@@ -1,6 +1,13 @@
 package inventory
 
-type itemInterface interface{}
+import (
+	sprite "project_m/internal/engine"
+)
+
+type itemInterface interface {
+	GetSprite() *sprite.Sprite
+	GetName() string
+}
 
 type InventorySlot struct {
 	Quantity int
@@ -8,7 +15,7 @@ type InventorySlot struct {
 }
 
 type Inventory struct {
-	Items      [10]InventorySlot
+	Items [10]InventorySlot
 }
 
 func (i *Inventory) AddItem(item itemInterface, quantity int) {

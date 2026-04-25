@@ -1,10 +1,12 @@
 package inventoryUi
 
 import (
+	"fmt"
 	sprite "project_m/internal/engine"
 	"project_m/internal/inventory"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 type InventoryUI struct {
@@ -32,8 +34,20 @@ func (ui *InventoryUI) Instantiate(scaleX, scaleY float64) {
 }
 
 func (ui *InventoryUI) Draw(screen *ebiten.Image) {
-	for _, sprite := range ui.SpritesInstantiated {
+	for index, item := range ui.Data.Items {
+		sprite := ui.SpritesInstantiated[index]
 		sprite.Draw(screen)
+
+		if item.Item != nil {
+			itemSprite := item.Item.GetSprite()
+			itemSprite.X = sprite.X + (ui.SpriteSlotSize - 32)/2
+			itemSprite.Y = sprite.Y + (ui.SpriteSlotSize - 32)/2
+			itemSprite.ScaleX = 1
+			itemSprite.ScaleY = 1
+
+			itemSprite.Draw(screen)
+
+		}
 	}
 }
 
