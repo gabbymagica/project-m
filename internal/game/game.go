@@ -20,7 +20,7 @@ type Object struct {
 }
 
 type Game struct {
-	Map      [36][240]*Object
+	Map      [32][100]*Object
 	Tilesize int
 
 	Player   *player.Player
@@ -50,12 +50,7 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(960/2, 540/2)
-
-	if g.Player.Sprite != nil {
-		screen.DrawImage(g.Player.Sprite, op)
-	}
+	g.DrawTileBorders(screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("Player X: %f\nPlayer Y: %f", g.Player.X, g.Player.Y))
 
 	g.InventoryUi.Draw(screen)
@@ -70,7 +65,7 @@ func GameSetup() *Game {
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
-	game.Tilesize = 16
+	game.Tilesize = 32
 
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
