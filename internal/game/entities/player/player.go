@@ -1,6 +1,6 @@
 package player
 
-import "game_top/game/entities"
+import "project_m/internal/game/entities"
 
 type Player struct {
 	entities.Entity
