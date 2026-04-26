@@ -30,7 +30,7 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 			screen_tile_edgeX, screen_tile_edgeY := tile_edgeX-tile_x0, tile_edgeY-tile_y0
 			vector.StrokeLine(screen, float32(screen_tile_edgeX), float32(screen_tile_edgeY), float32(screen_tile_edgeX)+float32(g.Tilesize), float32(screen_tile_edgeY), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			vector.StrokeLine(screen, float32(screen_tile_edgeX), float32(screen_tile_edgeY), float32(screen_tile_edgeX), float32(screen_tile_edgeY)+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			if tileX == len(g.Map[y]) {
+			if tileX == len(g.Map[tileY]) {
 				vector.StrokeLine(screen, float32(screen_tile_edgeX)+float32(g.Tilesize), float32(screen_tile_edgeY), float32(screen_tile_edgeX)+float32(g.Tilesize), float32(screen_tile_edgeY)+float32(g.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			}
 			if tileY == len(g.Map) {

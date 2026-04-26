@@ -1,11 +1,11 @@
 package player
 
 import (
-	"project_m/internal/game/entities"
+	"project_m/internal/engine"
 	"project_m/internal/inventory"
 )
 
 type Player struct {
-	entities.Entity
+	engine.Entity
 	Inventory *inventory.Inventory
 }

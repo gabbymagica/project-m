@@ -5,8 +5,7 @@ import (
 	"image/color"
 	"project_m/assets"
 	inventoryUi "project_m/internal/display/ui"
-	sprite "project_m/internal/engine"
-	"project_m/internal/game/entities"
+	"project_m/internal/engine"
 	"project_m/internal/game/entities/player"
 	item "project_m/internal/game/items"
 	"project_m/internal/inventory"
@@ -17,7 +16,7 @@ import (
 )
 
 type Object struct {
-	Sprite *ebiten.Image
+	Sprite *engine.Sprite
 }
 
 type Game struct {
@@ -25,7 +24,7 @@ type Game struct {
 	Tilesize int
 
 	Player   *player.Player
-	Entities []*entities.Entity
+	Entities []*engine.Entity
 	Inputs   []ebiten.Key
 
 	InventoryUi *inventoryUi.InventoryUI
@@ -74,7 +73,7 @@ func GameSetup() *Game {
 	inventory := &inventory.Inventory{}
 
 	game.Player = &player.Player{
-		Entity: entities.Entity{
+		Entity: engine.Entity{
 			Sprite: el_quadrado_vermelho,
 		},
 
@@ -83,7 +82,7 @@ func GameSetup() *Game {
 
 	inventoryUi := &inventoryUi.InventoryUI{
 		Data: inventory,
-		SpriteSlot: sprite.NewSprite(
+		SpriteSlot: engine.NewSprite(
 			"slot",
 			"slot",
 			assets.LoadImage("slot.png"),

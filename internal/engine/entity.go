@@ -1,4 +1,4 @@
-package entities
+package engine
 
 import "github.com/hajimehoshi/ebiten/v2"
 

@@ -1,23 +1,22 @@
-package sprite
+package engine
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-
 type Sprite struct {
-	ID     string
-	Name   string
-	Image *ebiten.Image
+	ID             string
+	Name           string
+	Image          *ebiten.Image
 	ScaleX, ScaleY float64
-	X, Y int
+	X, Y           int
 }
 
 func NewSprite(id, name string, image *ebiten.Image) *Sprite {
 	return &Sprite{
-		ID: id,
-		Name: name,
-		Image: image,
+		ID:     id,
+		Name:   name,
+		Image:  image,
 		ScaleX: 1.0,
 		ScaleY: 1.0,
 	}
