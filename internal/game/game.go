@@ -15,13 +15,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type Object struct {
-	Sprite *engine.Sprite
-}
-
 type Game struct {
-	Map      [32][100]*Object
-	Tilesize int
+	Map *engine.Map
 
 	Player   *player.Player
 	Entities []*engine.Entity
@@ -65,7 +60,7 @@ func GameSetup() *Game {
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
-	game.Tilesize = 32
+	game.Map = engine.NewMap(16)
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
@@ -73,10 +68,6 @@ func GameSetup() *Game {
 	inventory := &inventory.Inventory{}
 
 	game.Player = &player.Player{
-		Entity: engine.Entity{
-			Sprite: el_quadrado_vermelho,
-		},
-
 		Inventory: inventory,
 	}
 
@@ -102,5 +93,8 @@ func GameSetup() *Game {
 	cobre := itemManager.Cobre.Instantiate()
 
 	inventory.AddItem(cobre, 5)
+
+	game.Map.NewObject(0, 0, 1, 1, engine.NewSprite("", "", el_quadrado_vermelho))
+
 	return game
 }

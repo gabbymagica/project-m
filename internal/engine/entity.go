@@ -1,13 +1,13 @@
 package engine
 
-import "github.com/hajimehoshi/ebiten/v2"
-
 type Entity struct {
 	X, Y   int
-	Sprite *ebiten.Image
+	Sprite *Sprite
 }
 
 func (e *Entity) move(dx, dy int) {
-	e.X += dx
-	e.Y += dy
+	e.X = dx
+	e.Y = dy
+	e.Sprite.X = dx
+	e.Sprite.Y = dy
 }
