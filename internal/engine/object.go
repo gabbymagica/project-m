@@ -4,20 +4,20 @@ import "errors"
 
 type Object struct {
 	ID     int
-	tileX  int
-	tileY  int
-	sizeX  int
-	sizeY  int
-	sprite *Sprite
+	TileX  int
+	TileY  int
+	SizeX  int
+	SizeY  int
+	Sprite *Sprite
 }
 
-func (m *Map) NewObject(tileX, tileY int, sizeX, sizeY int, sprite *Sprite) (*Object, error) {
+func (m *Map) NewObject(tileX, tileY int, tileZ int, sizeX, sizeY int, sprite *Sprite) (*Object, error) {
 	object := &Object{
-		tileX:  tileX,
-		tileY:  tileY,
-		sizeX:  sizeX,
-		sizeY:  sizeY,
-		sprite: sprite,
+		TileX:  tileX,
+		TileY:  tileY,
+		SizeX:  sizeX,
+		SizeY:  sizeY,
+		Sprite: sprite,
 	}
 
 	if tileX+sizeX >= m.MapSizeX || tileY+sizeY >= m.MapSizeY {
@@ -27,15 +27,31 @@ func (m *Map) NewObject(tileX, tileY int, sizeX, sizeY int, sprite *Sprite) (*Ob
 	// verifica se tem algum objeto no lugar
 	for y := tileY; y < tileY+sizeY; y++ {
 		for x := tileX; x < tileX+sizeX; x++ {
-			if m.tiles[x][y] != nil {
-				return nil, errors.New("objeto conflitante com outro no mapa")
+			if tileZ == 0 {
+				if m.TilesZ0[y][x] != nil {
+					return nil, errors.New("objeto conflitante com outro no mapa")
+				}
+			} else if tileZ == 1 {
+				if m.TilesZ1[y][x] != nil {
+					return nil, errors.New("objeto conflitante com outro no mapa")
+				}
+			} else if tileZ == 2 {
+				if m.TilesZ2[y][x] != nil {
+					return nil, errors.New("objeto conflitante com outro no mapa")
+				}
 			}
 		}
 	}
 
 	for y := tileY; y < tileY+sizeY; y++ {
 		for x := tileX; x < tileX+sizeX; x++ {
-			m.tiles[x][y] = object
+			if tileZ == 0 {
+				m.TilesZ0[y][x] = object
+			} else if tileZ == 1 {
+				m.TilesZ1[y][x] = object
+			} else if tileZ == 2 {
+				m.TilesZ2[y][x] = object
+			}
 		}
 	}
 

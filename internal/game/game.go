@@ -25,6 +25,8 @@ type Game struct {
 	InventoryUi *inventoryUi.InventoryUI
 }
 
+const MINIMUM_TILESIZE_SIZE = 1
+
 func (g *Game) Update() error {
 	g.Inputs = inpututil.AppendPressedKeys(g.Inputs[:0])
 
@@ -41,11 +43,18 @@ func (g *Game) Update() error {
 		g.Player.Y -= 5
 	}
 
+	// ainda não é ideal scrollar assim, só uma gambiarra temporária
+	_, dy := ebiten.Wheel()
+	if !(g.Map.Tilesize+int(dy) < MINIMUM_TILESIZE_SIZE) {
+		g.Map.Tilesize += int(dy)
+	}
+
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawTileBorders(screen)
+	g.DrawTileSprites(screen)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("Player X: %f\nPlayer Y: %f", g.Player.X, g.Player.Y))
 
 	g.InventoryUi.Draw(screen)
@@ -60,7 +69,7 @@ func GameSetup() *Game {
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
-	game.Map = engine.NewMap(16)
+	game.Map = engine.NewMap(32)
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
@@ -78,9 +87,9 @@ func GameSetup() *Game {
 			"slot",
 			assets.LoadImage("slot.png"),
 		),
-		StartX:         360,
-		StartY:         720,
-		Spacing:        10,
+		StartX:  360,
+		StartY:  720,
+		Spacing: 10,
 	}
 
 	inventoryUi.Instantiate(1, 1)
@@ -93,7 +102,10 @@ func GameSetup() *Game {
 
 	inventory.AddItem(cobre, 5)
 
-	game.Map.NewObject(0, 0, 1, 1, engine.NewSprite("", "", el_quadrado_vermelho))
+	for x := range 99 {
+		_, err := game.Map.NewObject(x, 0, 0, 1, 1, engine.NewSprite("", "", el_quadrado_vermelho))
+		fmt.Printf("%v", err)
+	}
 
 	return game
 }
