@@ -29,16 +29,16 @@ func (g *Game) Update() error {
 	g.Inputs = inpututil.AppendPressedKeys(g.Inputs[:0])
 
 	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.Player.X += 30
+		g.Player.X += 5
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.Player.X -= 30
+		g.Player.X -= 5
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.Player.Y += 30
+		g.Player.Y += 5
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.Player.Y -= 30
+		g.Player.Y -= 5
 	}
 
 	return nil
@@ -80,7 +80,6 @@ func GameSetup() *Game {
 		),
 		StartX:         360,
 		StartY:         720,
-		SpriteSlotSize: 64,
 		Spacing:        10,
 	}
 
