@@ -102,7 +102,7 @@ func GameSetup() *Game {
 
 	inventory.AddItem(cobre, 5)
 
-	for x := range 99 {
+	for x := range 100 {
 		_, err := game.Map.NewObject(x, 0, 0, 1, 1, engine.NewSprite("", "", el_quadrado_vermelho))
 		fmt.Printf("%v", err)
 	}

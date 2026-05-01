@@ -1,44 +1,48 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
+	"math"
 	"project_m/internal/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 	bounds := screen.Bounds()
-	height := bounds.Dy()
-	width := bounds.Dx()
+	width, height := bounds.Dx(), bounds.Dy()
 
-	tile_x0, tile_y0 := g.Player.X-(width/2), g.Player.Y-(height/2)
+	tile_x0 := float64(g.Player.X - (width / 2))
+	tile_y0 := float64(g.Player.Y - (height / 2))
+	tileSize := float64(g.Map.Tilesize)
 
-	modTilesize_x0, modTilesize_y0 := tile_x0%g.Map.Tilesize, tile_y0%g.Map.Tilesize // <- se incrementamos sempre com o mesmo passo, o resultado dessa operação é SEMPRE o mesmo, podemos calcular de antemão
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("\n\ntile_x0: %d tile_y0: %d", tile_x0, tile_y0))
+	minTileX := int(math.Floor(tile_x0 / tileSize))
+	maxTileX := int(math.Floor((tile_x0+float64(width))/tileSize)) + 1
+	minTileY := int(math.Floor(tile_y0 / tileSize))
+	maxTileY := int(math.Floor((tile_y0+float64(height))/tileSize)) + 1
 
-	fmt.Println(tile_y0, tile_y0+height+g.Map.Tilesize, tile_y0-tile_y0+height+g.Map.Tilesize)
-	for y := tile_y0; y <= tile_y0+height+g.Map.Tilesize; y += g.Map.Tilesize {
-		for x := tile_x0; x <= tile_x0+width+g.Map.Tilesize; x += g.Map.Tilesize {
-			tileX, tileY := int(x/g.Map.Tilesize), int(y/g.Map.Tilesize)
-			if tileY < 0 || tileY >= g.Map.MapSizeY {
-				continue
-			}
+	for tileY := minTileY; tileY <= maxTileY; tileY++ {
+		if tileY < 0 || tileY >= g.Map.MapSizeY {
+			continue
+		}
+		for tileX := minTileX; tileX <= maxTileX; tileX++ {
 			if tileX < 0 || tileX >= g.Map.MapSizeX {
 				continue
 			}
-			tile_edgeX, tile_edgeY := x-modTilesize_x0, y-modTilesize_y0
-			screen_tile_edgeX, screen_tile_edgeY := tile_edgeX-tile_x0, tile_edgeY-tile_y0
-			vector.StrokeLine(screen, float32(screen_tile_edgeX), float32(screen_tile_edgeY), float32(screen_tile_edgeX)+float32(g.Map.Tilesize), float32(screen_tile_edgeY), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			vector.StrokeLine(screen, float32(screen_tile_edgeX), float32(screen_tile_edgeY), float32(screen_tile_edgeX), float32(screen_tile_edgeY)+float32(g.Map.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+
+			screenX := float32((float64(tileX) * tileSize) - tile_x0)
+			screenY := float32((float64(tileY) * tileSize) - tile_y0)
+			ts := float32(g.Map.Tilesize)
+
+			vector.StrokeLine(screen, screenX, screenY, screenX+ts, screenY, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			vector.StrokeLine(screen, screenX, screenY, screenX, screenY+ts, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+
 			if tileX == g.Map.MapSizeX-1 {
-				vector.StrokeLine(screen, float32(screen_tile_edgeX)+float32(g.Map.Tilesize), float32(screen_tile_edgeY), float32(screen_tile_edgeX)+float32(g.Map.Tilesize), float32(screen_tile_edgeY)+float32(g.Map.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+				vector.StrokeLine(screen, screenX+ts, screenY, screenX+ts, screenY+ts, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			}
 			if tileY == g.Map.MapSizeY-1 {
-				vector.StrokeLine(screen, float32(screen_tile_edgeX), float32(screen_tile_edgeY)+float32(g.Map.Tilesize), float32(screen_tile_edgeX)+float32(g.Map.Tilesize), float32(screen_tile_edgeY)+float32(g.Map.Tilesize), 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+				vector.StrokeLine(screen, screenX, screenY+ts, screenX+ts, screenY+ts, 1, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			}
 		}
 	}
@@ -46,24 +50,27 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 
 func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 	bounds := screen.Bounds()
-	height := bounds.Dy()
-	width := bounds.Dx()
+	width, height := bounds.Dx(), bounds.Dy()
 
-	tile_x0, tile_y0 := g.Player.X-(width/2), g.Player.Y-(height/2)
+	tile_x0 := float64(g.Player.X - (width / 2))
+	tile_y0 := float64(g.Player.Y - (height / 2))
+	tileSize := float64(g.Map.Tilesize)
+
+	minTileX := int(math.Floor(tile_x0 / tileSize))
+	maxTileX := int(math.Floor((tile_x0+float64(width))/tileSize)) + 1
+	minTileY := int(math.Floor(tile_y0 / tileSize))
+	maxTileY := int(math.Floor((tile_y0+float64(height))/tileSize)) + 1
 
 	for z := 0; z < 3; z++ {
-		for y := tile_y0; y <= tile_y0+height+g.Map.Tilesize; y += g.Map.Tilesize {
-			for x := tile_x0; x <= tile_x0+width+g.Map.Tilesize; x += g.Map.Tilesize {
-				tileX, tileY := int(x/g.Map.Tilesize), int(y/g.Map.Tilesize)
-				if tileY < 0 || tileY >= g.Map.MapSizeY {
-					continue
-				}
+		for tileY := minTileY; tileY <= maxTileY; tileY++ {
+			if tileY < 0 || tileY >= g.Map.MapSizeY {
+				continue
+			}
+			for tileX := minTileX; tileX <= maxTileX; tileX++ {
 				if tileX < 0 || tileX >= g.Map.MapSizeX {
 					continue
 				}
 
-				tile_edgeX, tile_edgeY := x-(x%g.Map.Tilesize), y-(y%g.Map.Tilesize)
-				screen_tile_edgeX, screen_tile_edgeY := tile_edgeX-tile_x0, tile_edgeY-tile_y0
 				var object *engine.Object
 				if z == 0 {
 					object = g.Map.TilesZ0[tileY][tileX]
@@ -72,14 +79,16 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 				} else if z == 2 {
 					object = g.Map.TilesZ2[tileY][tileX]
 				}
-				if object != nil {
-					if object.Sprite != nil {
-						object.Sprite.X = screen_tile_edgeX
-						object.Sprite.Y = screen_tile_edgeY
-						object.Sprite.ScaleX = float64(g.Map.Tilesize) / 16
-						object.Sprite.ScaleY = float64(g.Map.Tilesize) / 16
-						object.Sprite.Draw(screen)
-					}
+
+				if object != nil && object.Sprite != nil {
+					screenX := (float64(tileX) * tileSize) - tile_x0
+					screenY := (float64(tileY) * tileSize) - tile_y0
+
+					object.Sprite.X = int(screenX)
+					object.Sprite.Y = int(screenY)
+					object.Sprite.ScaleX = tileSize / 16
+					object.Sprite.ScaleY = tileSize / 16
+					object.Sprite.Draw(screen)
 				}
 			}
 		}
