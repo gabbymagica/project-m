@@ -22,6 +22,8 @@ type Game struct {
 	Entities []*engine.Entity
 	Inputs   []ebiten.Key
 
+	TestObject engine.Object
+
 	InventoryUi *inventoryUi.InventoryUI
 }
 
@@ -55,6 +57,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.DrawTileBorders(screen)
 	g.DrawTileSprites(screen)
+	g.DrawSpritePreview(screen, &g.TestObject)
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("Player X: %f\nPlayer Y: %f", g.Player.X, g.Player.Y))
 
 	g.InventoryUi.Draw(screen)
@@ -102,10 +105,9 @@ func GameSetup() *Game {
 
 	inventory.AddItem(cobre, 5)
 
-	for x := range 100 {
-		_, err := game.Map.NewObject(x, 0, 0, 1, 1, engine.NewSprite("", "", el_quadrado_vermelho))
-		fmt.Printf("%v", err)
-	}
+	objeto, err := game.Map.NewObject(0, 0, 0, 3, 3, engine.NewSprite("", "", el_quadrado_vermelho))
+	game.TestObject = *objeto
+	fmt.Printf("%v", err)
 
 	return game
 }

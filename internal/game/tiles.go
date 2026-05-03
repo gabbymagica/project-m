@@ -1,11 +1,13 @@
 package game
 
 import (
+	"fmt"
 	"image/color"
 	"math"
 	"project_m/internal/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -81,16 +83,46 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 				}
 
 				if object != nil && object.Sprite != nil {
-					screenX := (float64(tileX) * tileSize) - tile_x0
-					screenY := (float64(tileY) * tileSize) - tile_y0
+					if object.TileX == tileX && object.TileY == tileY {
+						screenX := (float64(tileX) * tileSize) - tile_x0
+						screenY := (float64(tileY) * tileSize) - tile_y0
 
-					object.Sprite.X = int(screenX)
-					object.Sprite.Y = int(screenY)
-					object.Sprite.ScaleX = tileSize / 16
-					object.Sprite.ScaleY = tileSize / 16
-					object.Sprite.Draw(screen)
+						object.Sprite.X = int(screenX)
+						object.Sprite.Y = int(screenY)
+						object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
+						object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
+						object.Sprite.Draw(screen)
+					}
 				}
 			}
 		}
 	}
+}
+
+func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
+	x, y := ebiten.CursorPosition()
+	bounds := screen.Bounds()
+	width, height := bounds.Dx(), bounds.Dy()
+	tileSize := float64(g.Map.Tilesize)
+
+	tile_x0 := float64(g.Player.X) - (float64(width) / 2)
+	tile_y0 := float64(g.Player.Y) - (float64(height) / 2)
+
+	worldCursorX := tile_x0 + float64(x)
+	worldCursorY := tile_y0 + float64(y)
+
+	tileX := int(math.Floor(worldCursorX / tileSize))
+	tileY := int(math.Floor(worldCursorY / tileSize))
+
+	screenX := int((float64(tileX) * tileSize) - tile_x0)
+	screenY := int((float64(tileY) * tileSize) - tile_y0)
+
+	ebitenutil.DebugPrint(screen, fmt.Sprintf("\n\nCursor X: %d, Cursor Y: %d\nScreenX: %d, ScreenY: %d", x, y, screenX, screenY))
+
+	object.Sprite.X = screenX
+	object.Sprite.Y = screenY
+	object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
+	object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
+	object.Sprite.SetAlpha(0.4)
+	object.Sprite.Draw(screen)
 }
