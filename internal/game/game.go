@@ -11,55 +11,40 @@ import (
 	"project_m/internal/inventory"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
+)
+
+type TileStateInt int
+
+const (
+	StateDestroying TileStateInt = iota
+	StateBuilding
+	StatePreview
+	StateDrawSprites
 )
 
 type Game struct {
 	Map *engine.Map
 
+	Camera   *engine.Camera
 	Player   *player.Player
 	Entities []*engine.Entity
 	Inputs   []ebiten.Key
 
-	TestObject engine.Object
+	TestObject *engine.Object
 
+	TileStates  map[TileStateInt]bool
 	InventoryUi *inventoryUi.InventoryUI
 }
 
 const MINIMUM_TILESIZE_SIZE = 1
 
 func (g *Game) Update() error {
-	g.Inputs = inpututil.AppendPressedKeys(g.Inputs[:0])
-
-	if ebiten.IsKeyPressed(ebiten.KeyD) {
-		g.Player.X += 5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyA) {
-		g.Player.X -= 5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyS) {
-		g.Player.Y += 5
-	}
-	if ebiten.IsKeyPressed(ebiten.KeyW) {
-		g.Player.Y -= 5
-	}
-
-	// ainda não é ideal scrollar assim, só uma gambiarra temporária
-	_, dy := ebiten.Wheel()
-	if !(g.Map.Tilesize+int(dy) < MINIMUM_TILESIZE_SIZE) {
-		g.Map.Tilesize += int(dy)
-	}
-
+	g.HandleGameInputs()
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.DrawTileBorders(screen)
-	g.DrawTileSprites(screen)
-	g.DrawSpritePreview(screen, &g.TestObject)
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("Player X: %f\nPlayer Y: %f", g.Player.X, g.Player.Y))
-
+	g.HandleTileDrawStates(screen)
 	g.InventoryUi.Draw(screen)
 }
 
@@ -72,6 +57,13 @@ func GameSetup() *Game {
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
+	game.TileStates = map[TileStateInt]bool{
+		StateBuilding:    false,
+		StateDestroying:  false,
+		StatePreview:     false,
+		StateDrawSprites: true,
+	}
+
 	game.Map = engine.NewMap(32)
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
@@ -82,6 +74,8 @@ func GameSetup() *Game {
 	game.Player = &player.Player{
 		Inventory: inventory,
 	}
+
+	game.Camera = &engine.Camera{}
 
 	inventoryUi := &inventoryUi.InventoryUI{
 		Data: inventory,
@@ -106,7 +100,10 @@ func GameSetup() *Game {
 	inventory.AddItem(cobre, 5)
 
 	objeto, err := game.Map.NewObject(0, 0, 0, 3, 3, engine.NewSprite("", "", el_quadrado_vermelho))
-	game.TestObject = *objeto
+	clone := *objeto
+	clone.Sprite = objeto.Sprite.Instantiate()
+
+	game.TestObject = &clone
 	fmt.Printf("%v", err)
 
 	return game
