@@ -17,7 +17,7 @@ func (g *Game) inputUIStates() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
 		g.TileStates[StateDestroying] = !g.TileStates[StateDestroying]
 	}
-	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
 		g.TileStates[StatePreview] = !g.TileStates[StatePreview]
 	}
 }

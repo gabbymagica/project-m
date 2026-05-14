@@ -3,66 +3,81 @@ package engine
 import "errors"
 
 type Object struct {
-	ID     int
+	ID     string
 	TileX  int
 	TileY  int
-	TileZ  int
+	Layer  int
 	SizeX  int
 	SizeY  int
+	ClusterMultiplier float32
 	Sprite *Sprite
 }
 
-func (m *Map) NewObject(tileX, tileY int, tileZ int, sizeX, sizeY int, sprite *Sprite) (*Object, error) {
-	object := &Object{
+func NewObject(id string, tileX, tileY int, layer int, sizeX, sizeY int, clusterMultiplier float32, sprite *Sprite) *Object {
+	return &Object{
+		ID:     id,
 		TileX:  tileX,
 		TileY:  tileY,
-		TileZ:  tileZ,
+		Layer:  layer,
 		SizeX:  sizeX,
 		SizeY:  sizeY,
+		ClusterMultiplier: clusterMultiplier,
 		Sprite: sprite,
 	}
+}
 
-	if tileX+sizeX > m.MapSizeX || tileY+sizeY > m.MapSizeY {
-		return nil, errors.New("objeto out of bounds")
+func (o *Object) Clone() *Object {
+	newObject := *o
+	newObject.Sprite = o.Sprite.Instantiate()
+
+	return &newObject
+}
+
+func (m *Map) PutObject(object *Object) ( error) {
+
+	if object.TileX+object.SizeX > m.MapSizeX || object.TileY+object.SizeY > m.MapSizeY {
+		return errors.New("objeto out of bounds")
 	}
 
-	for y := tileY; y < tileY+sizeY; y++ {
-		for x := tileX; x < tileX+sizeX; x++ {
-			if tileZ == 0 && m.TilesZ0[y][x] != nil {
-				return nil, errors.New("objeto conflitante com outro no mapa")
-			} else if tileZ == 1 && m.TilesZ1[y][x] != nil {
-				return nil, errors.New("objeto conflitante com outro no mapa")
-			} else if tileZ == 2 && m.TilesZ2[y][x] != nil {
-				return nil, errors.New("objeto conflitante com outro no mapa")
+	for y := object.TileY; y < object.TileY+object.SizeY; y++ {
+		for x := object.TileX; x < object.TileX+object.SizeX; x++ {
+			if object.Layer == 0 && m.TilesZ0[y][x] != nil {
+				return errors.New("objeto conflitante com outro no mapa")
+			} else if object.Layer == 1 && m.TilesZ1[y][x] != nil {
+				return errors.New("objeto conflitante com outro no mapa")
+			} else if object.Layer == 2 && m.TilesZ2[y][x] != nil {
+				return errors.New("objeto conflitante com outro no mapa")
+			}
+		}
+	}
+	for y := object.TileY; y < object.TileY+object.SizeY; y++ {
+		for x := object.TileX; x < object.TileX+object.SizeX; x++ {
+			switch object.Layer {
+				case 0:
+					m.TilesZ0[y][x] = object
+				case 1:
+					m.TilesZ1[y][x] = object
+				case 2:
+					m.TilesZ2[y][x] = object
 			}
 		}
 	}
 
-	for y := tileY; y < tileY+sizeY; y++ {
-		for x := tileX; x < tileX+sizeX; x++ {
-			if tileZ == 0 {
-				m.TilesZ0[y][x] = object
-			} else if tileZ == 1 {
-				m.TilesZ1[y][x] = object
-			} else if tileZ == 2 {
-				m.TilesZ2[y][x] = object
-			}
-		}
-	}
-
-	return object, nil
+	return nil
 }
 
 func (m *Map) DestroyObject(object *Object) {
 	for y := object.TileY; y < object.TileY+object.SizeY; y++ {
 		for x := object.TileX; x < object.TileX+object.SizeX; x++ {
-			if object.TileZ == 0 {
-				m.TilesZ0[y][x] = nil
-			} else if object.TileZ == 1 {
-				m.TilesZ1[y][x] = nil
-			} else if object.TileZ == 2 {
-				m.TilesZ2[y][x] = nil
+			switch object.Layer {
+				case 0:
+					m.TilesZ0[y][x] = nil
+				case 1:
+					m.TilesZ1[y][x] = nil
+				case 2:
+					m.TilesZ2[y][x] = nil
 			}
 		}
 	}
 }
+

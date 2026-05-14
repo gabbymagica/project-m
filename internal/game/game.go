@@ -1,13 +1,11 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 	"project_m/assets"
 	inventoryUi "project_m/internal/display/ui"
 	"project_m/internal/engine"
 	"project_m/internal/game/entities/player"
-	item "project_m/internal/game/items"
 	"project_m/internal/inventory"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -66,17 +64,23 @@ func GameSetup() *Game {
 
 	game.Map = engine.NewMap(32)
 
-	el_quadrado_vermelho := ebiten.NewImage(16, 16)
-	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
+	grass := engine.NewObject("grass",0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
+	rock_grass := engine.NewObject("rock_grass", 0, 0, 0, 1, 1, 10,  engine.NewSprite("rock_grass", "rock_grass", assets.LoadImage("tiles/rock-grass.png")))
+	copper := engine.NewObject("copper", 0,0, 0, 1, 1, 400, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
+
+	prioridades := map[*engine.Object]float32 {
+		grass: 500,
+		rock_grass: 100,
+		copper: 1,
+	}
+
+	game.Map.GenerateMap(prioridades)
 
 	inventory := &inventory.Inventory{}
-
 	game.Player = &player.Player{
 		Inventory: inventory,
 	}
-
 	game.Camera = &engine.Camera{}
-
 	inventoryUi := &inventoryUi.InventoryUI{
 		Data: inventory,
 		SpriteSlot: engine.NewSprite(
@@ -84,27 +88,22 @@ func GameSetup() *Game {
 			"slot",
 			assets.LoadImage("slot.png"),
 		),
-		StartX:  360,
-		StartY:  720,
 		Spacing: 10,
 	}
-
 	inventoryUi.Instantiate(1, 1)
-
 	game.InventoryUi = inventoryUi
 
-	itemManager := item.NewItemManager()
 
-	cobre := itemManager.Cobre.Instantiate()
 
-	inventory.AddItem(cobre, 5)
+	
+	el_quadrado_vermelho := ebiten.NewImage(16, 16)
+	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
-	objeto, err := game.Map.NewObject(0, 0, 0, 3, 3, engine.NewSprite("", "", el_quadrado_vermelho))
-	clone := *objeto
-	clone.Sprite = objeto.Sprite.Instantiate()
+	objeto := engine.NewObject("quadradovermelho", 0, 0, 0, 3, 3, 0, engine.NewSprite("quadradovermelho", "quadradovermelho", el_quadrado_vermelho))
+	
+	game.Map.PutObject(objeto)
 
-	game.TestObject = &clone
-	fmt.Printf("%v", err)
+	game.TestObject = objeto.Clone()
 
 	return game
 }

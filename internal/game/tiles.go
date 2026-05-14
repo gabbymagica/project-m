@@ -1,13 +1,11 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
 	"math"
 	"project_m/internal/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -52,8 +50,10 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 			screenY := float32((float64(tileY) * tileSize) - tile_y0)
 			ts := float32(g.Map.Tilesize)
 
+
 			vector.StrokeLine(screen, screenX, screenY, screenX+ts, screenY, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			vector.StrokeLine(screen, screenX, screenY, screenX, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
+			
 
 			if tileX == g.Map.MapSizeX-1 {
 				vector.StrokeLine(screen, screenX+ts, screenY, screenX+ts, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
@@ -104,8 +104,8 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 
 						object.Sprite.X = int(screenX)
 						object.Sprite.Y = int(screenY)
-						object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
-						object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
+						//object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
+						//object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
 						object.Sprite.Draw(screen)
 					}
 				}
@@ -115,6 +115,9 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 }
 
 func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
+	if object == nil || object.Sprite == nil {
+		return
+	}
 	x, y := ebiten.CursorPosition()
 	bounds := screen.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
@@ -132,7 +135,6 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 	screenX := int((float64(tileX) * tileSize) - tile_x0)
 	screenY := int((float64(tileY) * tileSize) - tile_y0)
 
-	ebitenutil.DebugPrint(screen, fmt.Sprintf("\n\nCursor X: %d, Cursor Y: %d\nScreenX: %d, ScreenY: %d", x, y, screenX, screenY))
 
 	object.Sprite.X = screenX
 	object.Sprite.Y = screenY

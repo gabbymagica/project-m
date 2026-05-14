@@ -15,7 +15,7 @@ type InventorySlot struct {
 }
 
 type Inventory struct {
-	Items [10]InventorySlot
+	Items [36]InventorySlot
 }
 
 func (i *Inventory) AddItem(item itemInterface, quantity int) {

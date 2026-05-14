@@ -2,6 +2,7 @@ package item
 
 import (
 	"project_m/assets"
+	"project_m/internal/engine"
 	sprite "project_m/internal/engine"
 )
 
@@ -32,18 +33,17 @@ func (i *Item) GetName() string {
 	return i.Name
 }
 
-
 func CreateItem(id string, name string, spritePath string) *Item {
-	Image := assets.LoadImage("ores/" + spritePath)
+	Image := assets.LoadImage(spritePath)
 
 	return &Item{
 		ID:   id,
 		Name: name,
-		Sprite: &sprite.Sprite{
-			ID: id,
-			Name: name,
-			Image: Image,
-		},
+		Sprite: engine.NewSprite(
+			id,
+			name,
+			Image,
+		),
 	}
 }
 
@@ -53,6 +53,6 @@ type ItemManager struct {
 
 func NewItemManager() *ItemManager {
 	return &ItemManager{
-		Cobre: CreateItem("cobre", "Cobre", "cobre.png"),
+		Cobre: CreateItem("cobre", "Cobre", "ores/cobre.png"),
 	}
 }

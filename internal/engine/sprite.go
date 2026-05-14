@@ -51,3 +51,17 @@ func (s *Sprite) Draw(screen *ebiten.Image) {
 	op.GeoM.Translate(float64(s.X), float64(s.Y))
 	screen.DrawImage(s.Image, op)
 }
+
+type SpriteManager struct {
+	Sprites map[string]*Sprite
+}
+
+func NewSpriteManager() *SpriteManager {
+	return &SpriteManager{
+		Sprites: make(map[string]*Sprite),
+	}
+}
+
+func (sm *SpriteManager) AddSprite(sprite *Sprite) {
+	sm.Sprites[sprite.ID] = sprite
+}
