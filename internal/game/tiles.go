@@ -10,16 +10,16 @@ import (
 )
 
 func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
-	if g.TileStates[StatePreview] {
+	if g.RenderFlags.ShowTileBorders {
 		g.DrawTileBorders(screen)
 	}
-	if g.TileStates[StateBuilding] {
+	if g.GameMode == ModeBuilding {
 		g.DrawSpritePreview(screen, g.TestObject)
 	}
-	if g.TileStates[StateDestroying] {
+	if g.GameMode == ModeDestroying {
 		g.DrawDestroyingPreview(screen)
 	}
-	if g.TileStates[StateDrawSprites] {
+	if g.RenderFlags.ShowSprites {
 		g.DrawTileSprites(screen)
 	}
 }
@@ -50,10 +50,8 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 			screenY := float32((float64(tileY) * tileSize) - tile_y0)
 			ts := float32(g.Map.Tilesize)
 
-
 			vector.StrokeLine(screen, screenX, screenY, screenX+ts, screenY, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
 			vector.StrokeLine(screen, screenX, screenY, screenX, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			
 
 			if tileX == g.Map.MapSizeX-1 {
 				vector.StrokeLine(screen, screenX+ts, screenY, screenX+ts, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
@@ -134,7 +132,6 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 
 	screenX := int((float64(tileX) * tileSize) - tile_x0)
 	screenY := int((float64(tileY) * tileSize) - tile_y0)
-
 
 	object.Sprite.X = screenX
 	object.Sprite.Y = screenY

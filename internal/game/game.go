@@ -11,15 +11,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type TileStateInt int
-
-const (
-	StateDestroying TileStateInt = iota
-	StateBuilding
-	StatePreview
-	StateDrawSprites
-)
-
 type Game struct {
 	Map *engine.Map
 
@@ -30,7 +21,8 @@ type Game struct {
 
 	TestObject *engine.Object
 
-	TileStates  map[TileStateInt]bool
+	GameMode    GameMode
+	RenderFlags *RenderFlags
 	InventoryUi *inventoryUi.InventoryUI
 }
 
@@ -55,23 +47,21 @@ func GameSetup() *Game {
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
-	game.TileStates = map[TileStateInt]bool{
-		StateBuilding:    false,
-		StateDestroying:  false,
-		StatePreview:     false,
-		StateDrawSprites: true,
+
+	game.RenderFlags = &RenderFlags{
+		ShowSprites: true,
 	}
 
 	game.Map = engine.NewMap(32)
 
-	grass := engine.NewObject("grass",0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
-	rock_grass := engine.NewObject("rock_grass", 0, 0, 0, 1, 1, 10,  engine.NewSprite("rock_grass", "rock_grass", assets.LoadImage("tiles/rock-grass.png")))
-	copper := engine.NewObject("copper", 0,0, 0, 1, 1, 400, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
+	grass := engine.NewObject("grass", 0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
+	rock_grass := engine.NewObject("rock_grass", 0, 0, 0, 1, 1, 10, engine.NewSprite("rock_grass", "rock_grass", assets.LoadImage("tiles/rock-grass.png")))
+	copper := engine.NewObject("copper", 0, 0, 0, 1, 1, 400, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
 
-	prioridades := map[*engine.Object]float32 {
-		grass: 500,
+	prioridades := map[*engine.Object]float32{
+		grass:      500,
 		rock_grass: 100,
-		copper: 1,
+		copper:     1,
 	}
 
 	game.Map.GenerateMap(prioridades)
@@ -93,14 +83,11 @@ func GameSetup() *Game {
 	inventoryUi.Instantiate(1, 1)
 	game.InventoryUi = inventoryUi
 
-
-
-	
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
 	objeto := engine.NewObject("quadradovermelho", 0, 0, 0, 3, 3, 0, engine.NewSprite("quadradovermelho", "quadradovermelho", el_quadrado_vermelho))
-	
+
 	game.Map.PutObject(objeto)
 
 	game.TestObject = objeto.Clone()

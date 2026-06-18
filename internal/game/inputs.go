@@ -12,13 +12,13 @@ func (g *Game) HandleGameInputs() {
 
 func (g *Game) inputUIStates() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyB) {
-		g.TileStates[StateBuilding] = !g.TileStates[StateBuilding]
+		g.GameMode = ModeBuilding
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-		g.TileStates[StateDestroying] = !g.TileStates[StateDestroying]
+		g.GameMode = ModeDestroying
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyT) {
-		g.TileStates[StatePreview] = !g.TileStates[StatePreview]
+		g.RenderFlags.ShowTileBorders = !g.RenderFlags.ShowTileBorders
 	}
 }
 
