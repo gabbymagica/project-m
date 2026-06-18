@@ -10,8 +10,8 @@ import (
 )
 
 func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
-	if g.RenderFlags.ShowTileBorders {
-		g.DrawTileBorders(screen)
+	if g.RenderFlags.ShowSprites {
+		g.DrawTileSprites(screen)
 	}
 	if g.GameMode == ModeBuilding {
 		g.DrawSpritePreview(screen, g.TestObject)
@@ -19,8 +19,8 @@ func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
 	if g.GameMode == ModeDestroying {
 		g.DrawDestroyingPreview(screen)
 	}
-	if g.RenderFlags.ShowSprites {
-		g.DrawTileSprites(screen)
+	if g.RenderFlags.ShowTileBorders {
+		g.DrawTileBorders(screen)
 	}
 }
 
@@ -87,13 +87,7 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 				}
 
 				var object *engine.Object
-				if z == 0 {
-					object = g.Map.TilesZ0[tileY][tileX]
-				} else if z == 1 {
-					object = g.Map.TilesZ1[tileY][tileX]
-				} else if z == 2 {
-					object = g.Map.TilesZ2[tileY][tileX]
-				}
+				object = g.Map.Tiles[z][tileY][tileX]
 
 				if object != nil && object.Sprite != nil {
 					if object.TileX == tileX && object.TileY == tileY {
@@ -161,15 +155,12 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 	}
 
 	var object *engine.Object
-	if g.Map.TilesZ0[tileY][tileX] != nil {
-		object = g.Map.TilesZ0[tileY][tileX]
+	for z := 0; z < 3; z++ {
+		if g.Map.Tiles[z][tileY][tileX] != nil {
+			object = g.Map.Tiles[z][tileY][tileX]
+		}
 	}
-	if g.Map.TilesZ1[tileY][tileX] != nil {
-		object = g.Map.TilesZ1[tileY][tileX]
-	}
-	if g.Map.TilesZ2[tileY][tileX] != nil {
-		object = g.Map.TilesZ1[tileY][tileX]
-	}
+
 	if object == nil {
 		return
 	}
