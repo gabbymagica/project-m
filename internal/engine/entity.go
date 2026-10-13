@@ -1,13 +1,12 @@
 package engine
 
 type Entity struct {
-	X, Y   int
+	X, Y   float64
 	Sprite *Sprite
+	Speed  float64
 }
 
-func (e *Entity) move(dx, dy int) {
-	e.X = dx
-	e.Y = dy
-	e.Sprite.X = dx
-	e.Sprite.Y = dy
+func (e *Entity) Move(dx, dy float64) {
+	e.X += dx
+	e.Y += dy
 }

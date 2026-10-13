@@ -20,8 +20,8 @@ type InventoryUI struct {
 	Font       *text.GoTextFaceSource
 	Data       *inventory.Inventory
 	SpriteSlot *sprite.Sprite
-	StartX     int
-	StartY     int
+	StartX     float64
+	StartY     float64
 	Spacing    int
 
 	StateDragDrop StateDragDrop
@@ -29,72 +29,70 @@ type InventoryUI struct {
 	SpritesInstantiated []*sprite.Sprite
 }
 
-func (ui *InventoryUI) Instantiate(scaleX, scaleY float64) {
+func (ui *InventoryUI) Instantiate() {
 
 	ui.Font = engine.LoadFont("fonts/Pix32.ttf")
 
 	for range len(ui.Data.Items) {
 		sprite := ui.SpriteSlot.Instantiate()
 
-		sprite.ScaleX = scaleX
-		sprite.ScaleY = scaleY
 		ui.SpritesInstantiated = append(ui.SpritesInstantiated, sprite)
 	}
 }
 
-func (ui *InventoryUI) Drag(mouseX, mouseY int) {
-	for index, item := range ui.Data.Items {
-		if index == 9 && !ui.Open {
-			break
-		}
-		sprite := ui.SpritesInstantiated[index]
+// func (ui *InventoryUI) Drag(mouseX, mouseY int) {
+// 	for index, item := range ui.Data.Items {
+// 		if index == 9 && !ui.Open {
+// 			break
+// 		}
+// 		sprite := ui.SpritesInstantiated[index]
 
-		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
-			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
+// 		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
+// 			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
 			
-			if item.Item == nil {
-				break
-			}
+// 			if item.Item == nil {
+// 				break
+// 			}
 
-			ui.StateDragDrop.Active = true
-			ui.StateDragDrop.Item = &ui.Data.Items[index]
-			break
-		}
-	}
-}
+// 			ui.StateDragDrop.Active = true
+// 			ui.StateDragDrop.Item = &ui.Data.Items[index]
+// 			break
+// 		}
+// 	}
+// }
 
-func (ui *InventoryUI) Drop(mouseX, mouseY int) {
-	if ui.StateDragDrop.Item == nil {
-		return
-	}
+// func (ui *InventoryUI) Drop(mouseX, mouseY int) {
+// 	if ui.StateDragDrop.Item == nil {
+// 		return
+// 	}
 
-	for index := range ui.Data.Items {
-		if index == 9 && !ui.Open {
-			break
-		}
-		sprite := ui.SpritesInstantiated[index]
+// 	for index := range ui.Data.Items {
+// 		if index == 9 && !ui.Open {
+// 			break
+// 		}
+// 		sprite := ui.SpritesInstantiated[index]
 
-		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
-			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
+// 		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
+// 			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
 			
-			itemTrocado := ui.Data.Items[index]
-			ui.Data.Items[index] = *ui.StateDragDrop.Item;
-			*ui.StateDragDrop.Item = itemTrocado
+// 			itemTrocado := ui.Data.Items[index]
+// 			ui.Data.Items[index] = *ui.StateDragDrop.Item;
+// 			*ui.StateDragDrop.Item = itemTrocado
 
-			break
-		}
-	}
+// 			break
+// 		}
+// 	}
 
-	ui.StateDragDrop.Active = false
-	ui.StateDragDrop.Item = nil
-}
+// 	ui.StateDragDrop.Active = false
+// 	ui.StateDragDrop.Item = nil
+// }
 
 
 func (ui *InventoryUI) Draw(screen *ebiten.Image) {
 	screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
 
-	ui.StartX = (screenWidth - (9*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dx()) - ui.Spacing)) / 2
-	ui.StartY = screenHeight - ui.SpriteSlot.Image.Bounds().Dy() - 10
+	ui.StartX = float64(screenWidth - (9*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dx()) - ui.Spacing)) / 2
+	ui.StartY = float64(screenHeight) - float64(ui.SpriteSlot.Image.Bounds().Dy()) - 10
 
 	for index, item := range ui.Data.Items  {
 		if index == 9 {
@@ -106,32 +104,30 @@ func (ui *InventoryUI) Draw(screen *ebiten.Image) {
  
 		sprite := ui.SpritesInstantiated[index]
 
-		sprite.X = ui.StartX + (index % 9)*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dx())
-		sprite.Y = ui.StartY + (index / 9)*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dy())
+		spriteX := ui.StartX + float64(index % 9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dx()))
+		spriteY := ui.StartY + float64(index / 9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dy()))
 
-		sprite.Draw(screen)
+		sprite.Draw(screen, spriteX, spriteY, 1.0, 1.0)
 
 		if item.Item != nil {
 
 			itemSprite := item.Item.GetSprite()
-			itemSprite.X = sprite.X + (ui.SpriteSlot.Image.Bounds().Dx()-32)/2
-			itemSprite.Y = sprite.Y + (ui.SpriteSlot.Image.Bounds().Dy()-32)/2
-			itemSprite.ScaleX = 1
-			itemSprite.ScaleY = 1
+			itemSpriteX := spriteX + float64(ui.SpriteSlot.Image.Bounds().Dx()-32)/2
+			itemSpriteY := spriteY + float64(ui.SpriteSlot.Image.Bounds().Dy()-32)/2
 
-			itemSprite.Draw(screen)
+			itemSprite.Draw(screen, itemSpriteX, itemSpriteY, 1.0, 1.0)
 
-			engine.DrawText(screen, ui.Font, fmt.Sprintf("%d", item.Quantity), float64(sprite.X+10), float64(sprite.Y+6), 10, color.White)
+			engine.DrawText(screen, ui.Font, fmt.Sprintf("%d", item.Quantity), float64(int(spriteX+10)), float64(int(spriteY+6)), 12, color.White)
 
 		}
 		
 	}
 
-	if ui.StateDragDrop.Active && ui.StateDragDrop.Item != nil {
-		mouseX, mouseY := ebiten.CursorPosition()
-		itemSprite := ui.StateDragDrop.Item.Item.GetSprite()
-		itemSprite.X = mouseX - 16
-		itemSprite.Y = mouseY - 16
-		itemSprite.Draw(screen)
-	}
+	// if ui.StateDragDrop.Active && ui.StateDragDrop.Item != nil {
+	// 	mouseX, mouseY := ebiten.CursorPosition()
+	// 	itemSprite := ui.StateDragDrop.Item.Item.GetSprite()
+	// 	itemSprite.X = mouseX - 16
+	// 	itemSprite.Y = mouseY - 16
+	// 	itemSprite.Draw(screen)
+	// }
 }
