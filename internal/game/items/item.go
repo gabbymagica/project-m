@@ -7,7 +7,7 @@ import (
 )
 
 type Item struct {
-	ID 	string
+	ID     string
 	Name   string
 	Sprite *sprite.Sprite
 }
@@ -53,6 +53,9 @@ type ItemManager struct {
 
 func NewItemManager() *ItemManager {
 	return &ItemManager{
-		Cobre: CreateItem("cobre", "Cobre", "ores/cobre.png"),
+		Cobre: CreateItem("cobre", "Cobre", "ores/copper.png"),
 	}
 }
+
+var Manager *ItemManager = NewItemManager()
+

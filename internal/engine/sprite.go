@@ -8,8 +8,6 @@ type Sprite struct {
 	ID             string
 	Name           string
 	Image          *ebiten.Image
-	ScaleX, ScaleY float64
-	X, Y           int
 	Alpha          float32
 }
 
@@ -18,8 +16,6 @@ func NewSprite(id, name string, image *ebiten.Image) *Sprite {
 		ID:     id,
 		Name:   name,
 		Image:  image,
-		ScaleX: 1.0,
-		ScaleY: 1.0,
 		Alpha:  1.0,
 	}
 }
@@ -30,25 +26,20 @@ func (s *Sprite) Instantiate() *Sprite {
 	return &newSprite
 }
 
-func (s *Sprite) Scale(factorX, factorY float64) {
-	s.ScaleX = factorX
-	s.ScaleY = factorY
-}
-
 func (s *Sprite) SetAlpha(alpha float32) {
 	s.Alpha = alpha
 }
 
-func (s *Sprite) Draw(screen *ebiten.Image) {
+func (s *Sprite) Draw(screen *ebiten.Image, x, y float64, scaleX, scaleY float64, ) {
 	if s == nil || s.Image == nil || screen == nil {
 		return
 	}
-
+ 
 	op := &ebiten.DrawImageOptions{}
 	op.ColorScale.ScaleAlpha(s.Alpha)
-	op.GeoM.Scale(s.ScaleX, s.ScaleY)
+	op.GeoM.Scale(scaleX, scaleY)
 
-	op.GeoM.Translate(float64(s.X), float64(s.Y))
+	op.GeoM.Translate(x, y)
 	screen.DrawImage(s.Image, op)
 }
 

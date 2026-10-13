@@ -28,8 +28,8 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 	bounds := screen.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
 
-	tile_x0 := float64(g.Camera.X - (width / 2))
-	tile_y0 := float64(g.Camera.Y - (height / 2))
+	tile_x0 := g.Camera.X - float64(width/2)
+	tile_y0 := g.Camera.Y - float64(height/2)
 	tileSize := float64(g.Map.Tilesize)
 
 	minTileX := int(math.Floor(tile_x0 / tileSize))
@@ -67,8 +67,8 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 	bounds := screen.Bounds()
 	width, height := bounds.Dx(), bounds.Dy()
 
-	tile_x0 := float64(g.Camera.X - (width / 2))
-	tile_y0 := float64(g.Camera.Y - (height / 2))
+	tile_x0 := g.Camera.X - float64(width/2)
+	tile_y0 := g.Camera.Y - float64(height/2)
 	tileSize := float64(g.Map.Tilesize)
 
 	minTileX := int(math.Floor(tile_x0 / tileSize))
@@ -94,11 +94,7 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 						screenX := (float64(tileX) * tileSize) - tile_x0
 						screenY := (float64(tileY) * tileSize) - tile_y0
 
-						object.Sprite.X = int(screenX)
-						object.Sprite.Y = int(screenY)
-						//object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
-						//object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
-						object.Sprite.Draw(screen)
+						object.Sprite.Draw(screen, screenX, screenY, 1, 1)
 					}
 				}
 			}
@@ -115,8 +111,8 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 	width, height := bounds.Dx(), bounds.Dy()
 	tileSize := float64(g.Map.Tilesize)
 
-	tile_x0 := float64(g.Camera.X) - (float64(width) / 2)
-	tile_y0 := float64(g.Camera.Y) - (float64(height) / 2)
+	tile_x0 := g.Camera.X - (float64(width) / 2)
+	tile_y0 := g.Camera.Y - (float64(height) / 2)
 
 	worldCursorX := tile_x0 + float64(x)
 	worldCursorY := tile_y0 + float64(y)
@@ -124,15 +120,11 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 	tileX := int(math.Floor(worldCursorX / tileSize))
 	tileY := int(math.Floor(worldCursorY / tileSize))
 
-	screenX := int((float64(tileX) * tileSize) - tile_x0)
-	screenY := int((float64(tileY) * tileSize) - tile_y0)
+	screenX := (float64(tileX) * tileSize) - tile_x0
+	screenY := (float64(tileY) * tileSize) - tile_y0
 
-	object.Sprite.X = screenX
-	object.Sprite.Y = screenY
-	object.Sprite.ScaleX = (tileSize * float64(object.SizeX)) / 16
-	object.Sprite.ScaleY = (tileSize * float64(object.SizeY)) / 16
 	object.Sprite.SetAlpha(0.4)
-	object.Sprite.Draw(screen)
+	object.Sprite.Draw(screen, screenX, screenY, 1, 1)
 }
 
 func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
@@ -141,8 +133,8 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 	width, height := bounds.Dx(), bounds.Dy()
 	tileSize := float64(g.Map.Tilesize)
 
-	tile_x0 := float64(g.Camera.X) - (float64(width) / 2)
-	tile_y0 := float64(g.Camera.Y) - (float64(height) / 2)
+	tile_x0 := g.Camera.X - (float64(width) / 2)
+	tile_y0 := g.Camera.Y - (float64(height) / 2)
 
 	worldCursorX := tile_x0 + float64(x)
 	worldCursorY := tile_y0 + float64(y)

@@ -2,11 +2,13 @@ package game
 
 import (
 	"image/color"
-	"project_m/assets"
+	"time"
+
+	"project_m/internal/constants"
 	inventoryUi "project_m/internal/display/ui"
 	"project_m/internal/engine"
 	"project_m/internal/game/entities/player"
-	"project_m/internal/inventory"
+	item "project_m/internal/game/items"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -16,6 +18,7 @@ type Game struct {
 
 	Camera   *engine.Camera
 	Player   *player.Player
+	InventoryUi *inventoryUi.InventoryUI
 	Entities []*engine.Entity
 	Inputs   []ebiten.Key
 
@@ -23,27 +26,54 @@ type Game struct {
 
 	GameMode    GameMode
 	RenderFlags *RenderFlags
-	InventoryUi *inventoryUi.InventoryUI
+
+	ItemManager *item.ItemManager
+
+
+	// Time
+	lastUpdate time.Time
+	deltaTime float64
+	// Time
 }
 
-const MINIMUM_TILESIZE_SIZE = 1
+func (g *Game) CalculateDeltaTime() {
+	currentTime := time.Now()
+	if !g.lastUpdate.IsZero() {
+		g.deltaTime = currentTime.Sub(g.lastUpdate).Seconds()
+	} else {
+		g.deltaTime = 0
+	}
+	g.lastUpdate = currentTime
+
+	// (Opcional de segurança: trava o delta time máximo caso o jogo sofra um "lag spike" ou minimize)
+	if g.deltaTime > 0.1 {
+        g.deltaTime = 0.1
+    }
+}
 
 func (g *Game) Update() error {
+	g.CalculateDeltaTime()
+
 	g.HandleGameInputs()
+	g.Player.Update(g.deltaTime)
+	g.Camera.Follow(g.Player.X, g.Player.Y)
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.HandleTileDrawStates(screen)
+	g.Player.Draw(screen, g.Camera)
 	g.InventoryUi.Draw(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
-	return 1366, 768
+	return constants.LAYOUT_WIDTH, constants.LAYOUT_HEIGHT
 }
 
+
+
 func GameSetup() *Game {
-	ebiten.SetWindowSize(1366, 768)
+	ebiten.SetWindowSize(constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
 	ebiten.SetWindowTitle("mindustry 3")
 
 	game := &Game{}
@@ -52,36 +82,18 @@ func GameSetup() *Game {
 		ShowSprites: true,
 	}
 
-	game.Map = engine.NewMap(32)
-
-	grass := engine.NewObject("grass", 0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
-	rock_grass := engine.NewObject("rock_grass", 0, 0, 0, 1, 1, 10, engine.NewSprite("rock_grass", "rock_grass", assets.LoadImage("tiles/rock-grass.png")))
-	copper := engine.NewObject("copper", 0, 0, 0, 1, 1, 400, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
-
-	prioridades := map[*engine.Object]float32{
-		grass:      500,
-		rock_grass: 100,
-		copper:     1,
+	game.Camera = &engine.Camera{
+		ScreenWidth:  constants.LAYOUT_WIDTH,
+		ScreenHeight: constants.LAYOUT_HEIGHT,
 	}
+	
+	game.InitMap()
+	game.InitPlayer()
+	game.InitUi()
 
-	game.Map.GenerateMap(prioridades)
-
-	inventory := &inventory.Inventory{}
-	game.Player = &player.Player{
-		Inventory: inventory,
-	}
-	game.Camera = &engine.Camera{}
-	inventoryUi := &inventoryUi.InventoryUI{
-		Data: inventory,
-		SpriteSlot: engine.NewSprite(
-			"slot",
-			"slot",
-			assets.LoadImage("slot.png"),
-		),
-		Spacing: 10,
-	}
-	inventoryUi.Instantiate(1, 1)
-	game.InventoryUi = inventoryUi
+	// Teste
+	game.Player.Inventory.AddItem(item.Manager.Cobre, 10)
+	// Teste
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
@@ -91,6 +103,7 @@ func GameSetup() *Game {
 	game.Map.PutObject(objeto)
 
 	game.TestObject = objeto.Clone()
+
 
 	return game
 }

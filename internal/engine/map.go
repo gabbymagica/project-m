@@ -2,17 +2,19 @@ package engine
 
 import (
 	"math/rand"
+	"project_m/internal/constants"
 )
 
+
 type Map struct {
-	Tiles              [3][32][100]*Object
+	Tiles              [constants.MAP_LAYERS][32][100]*Object
 	MapSizeX, MapSizeY int
 	Tilesize           int
 }
 
 func NewMap(tilesize int) *Map {
 	return &Map{
-		Tiles:    [3][32][100]*Object{},
+		Tiles:    [constants.MAP_LAYERS][32][100]*Object{},
 		MapSizeY: 32,
 		MapSizeX: 100,
 		Tilesize: tilesize,
@@ -24,7 +26,7 @@ func (m *Map) GenerateMap(priorities map[*Object]float32) {
 		{0, -1},
 		{-1, 0},
 		{-1, -1},
-		{1, -1},
+		{-1, 1},
 	}
 
 	prioridadesLocais := make(map[*Object]float32)
