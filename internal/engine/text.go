@@ -31,7 +31,7 @@ func DrawText(screen *ebiten.Image, fonte *text.GoTextFaceSource, texto string, 
 
 	op := &text.DrawOptions{}
 
-	op.GeoM.Translate(x,y)
+	op.GeoM.Translate(x, y)
 	op.ColorScale.ScaleWithColor(color)
 	op.Filter = ebiten.FilterNearest
 

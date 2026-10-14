@@ -4,6 +4,7 @@ import (
 	"image/color"
 	"project_m/assets"
 	"project_m/internal/constants"
+	"project_m/internal/display/ui"
 	inventoryUi "project_m/internal/display/ui"
 	"project_m/internal/engine"
 	"project_m/internal/game/entities/player"
@@ -38,6 +39,7 @@ func (g *Game) InitPlayer() {
 	}
 	g.Player.Sprite = spritePlayer
 	g.Player.Speed = 5
+	g.Player.IsAction = false
 	g.Player.Mining = &player.Mining{
 		IsMining: false,
 		Object:   nil,
@@ -46,11 +48,13 @@ func (g *Game) InitPlayer() {
 	g.Player.Y = float64(constants.LAYOUT_HEIGHT / 2)
 	g.Player.Mining.Range = 200
 	g.Player.Mining.MiningDelay = 1.0
-
 }
 
 func (g *Game) InitUi() {
+	g.GameFonts = ui.InitFonts()
+
 	inventoryUi := &inventoryUi.InventoryUI{
+		Font: g.GameFonts.InventoryUIFont,
 		Data: g.Player.Inventory,
 		SpriteSlot: engine.NewSprite(
 			"slot",

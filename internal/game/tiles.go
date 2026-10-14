@@ -2,7 +2,7 @@ package game
 
 import (
 	"image/color"
-	"math"
+	"project_m/internal/constants"
 	"project_m/internal/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -25,77 +25,61 @@ func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
 }
 
 func (g *Game) DrawTileBorders(screen *ebiten.Image) {
-	bounds := screen.Bounds()
-	width, height := bounds.Dx(), bounds.Dy()
+	minTileX, minTileY, maxTileX, maxTileY := g.Camera.VisibleTileBounds(
+		g.Map.Tilesize,
+		g.Map.MapSizeX,
+		g.Map.MapSizeY,
+	)
 
-	tile_x0 := g.Camera.X - float64(width/2)
-	tile_y0 := g.Camera.Y - float64(height/2)
-	tileSize := float64(g.Map.Tilesize)
+	ts := float64(g.Map.Tilesize)
+	gridColor := color.RGBA{0xFF, 0xFF, 0xFF, 0x40}
+	lineThickness := float32(1.0)
 
-	minTileX := int(math.Floor(tile_x0 / tileSize))
-	maxTileX := int(math.Floor((tile_x0+float64(width))/tileSize)) + 1
-	minTileY := int(math.Floor(tile_y0 / tileSize))
-	maxTileY := int(math.Floor((tile_y0+float64(height))/tileSize)) + 1
+	screenMinX, screenMinY := g.Camera.WorldToScreen(float64(minTileX)*ts, float64(minTileY)*ts)
+	screenMaxX, screenMaxY := g.Camera.WorldToScreen(float64(maxTileX)*ts, float64(maxTileY)*ts)
 
-	for tileY := minTileY; tileY <= maxTileY; tileY++ {
-		if tileY < 0 || tileY >= g.Map.MapSizeY {
-			continue
-		}
-		for tileX := minTileX; tileX <= maxTileX; tileX++ {
-			if tileX < 0 || tileX >= g.Map.MapSizeX {
-				continue
-			}
+	for tx := minTileX; tx <= maxTileX; tx++ {
+		sx, _ := g.Camera.WorldToScreen(float64(tx)*ts, 0)
+		vector.StrokeLine(
+			screen,
+			float32(sx), float32(screenMinY),
+			float32(sx), float32(screenMaxY),
+			lineThickness,
+			gridColor,
+			false,
+		)
+	}
 
-			screenX := float32((float64(tileX) * tileSize) - tile_x0)
-			screenY := float32((float64(tileY) * tileSize) - tile_y0)
-			ts := float32(g.Map.Tilesize)
-
-			vector.StrokeLine(screen, screenX, screenY, screenX+ts, screenY, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			vector.StrokeLine(screen, screenX, screenY, screenX, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-
-			if tileX == g.Map.MapSizeX-1 {
-				vector.StrokeLine(screen, screenX+ts, screenY, screenX+ts, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			}
-			if tileY == g.Map.MapSizeY-1 {
-				vector.StrokeLine(screen, screenX, screenY+ts, screenX+ts, screenY+ts, 3, color.RGBA{0xFF, 0xFF, 0xFF, 0xFF}, false)
-			}
-		}
+	for ty := minTileY; ty <= maxTileY; ty++ {
+		_, sy := g.Camera.WorldToScreen(0, float64(ty)*ts)
+		vector.StrokeLine(
+			screen,
+			float32(screenMinX), float32(sy),
+			float32(screenMaxX), float32(sy),
+			lineThickness,
+			gridColor,
+			false,
+		)
 	}
 }
 
 func (g *Game) DrawTileSprites(screen *ebiten.Image) {
-	bounds := screen.Bounds()
-	width, height := bounds.Dx(), bounds.Dy()
+	minX, minY, maxX, maxY := g.Camera.VisibleTileBounds(g.Map.Tilesize, g.Map.MapSizeX, g.Map.MapSizeY)
 
-	tile_x0 := g.Camera.X - float64(width/2)
-	tile_y0 := g.Camera.Y - float64(height/2)
-	tileSize := float64(g.Map.Tilesize)
-
-	minTileX := int(math.Floor(tile_x0 / tileSize))
-	maxTileX := int(math.Floor((tile_x0+float64(width))/tileSize)) + 1
-	minTileY := int(math.Floor(tile_y0 / tileSize))
-	maxTileY := int(math.Floor((tile_y0+float64(height))/tileSize)) + 1
-
-	for z := 0; z < 3; z++ {
-		for tileY := minTileY; tileY <= maxTileY; tileY++ {
-			if tileY < 0 || tileY >= g.Map.MapSizeY {
-				continue
-			}
-			for tileX := minTileX; tileX <= maxTileX; tileX++ {
-				if tileX < 0 || tileX >= g.Map.MapSizeX {
+	for z := 0; z < constants.MAP_LAYERS; z++ {
+		for tileY := minY; tileY < maxY; tileY++ {
+			for tileX := minX; tileX < maxX; tileX++ {
+				obj := g.Map.Tiles[z][tileY][tileX]
+				if obj == nil || obj.Sprite == nil {
 					continue
 				}
 
-				var object *engine.Object
-				object = g.Map.Tiles[z][tileY][tileX]
+				if obj.TileX == tileX && obj.TileY == tileY {
+					worldX := float64(tileX * g.Map.Tilesize)
+					worldY := float64(tileY * g.Map.Tilesize)
+					screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-				if object != nil && object.Sprite != nil {
-					if object.TileX == tileX && object.TileY == tileY {
-						screenX := (float64(tileX) * tileSize) - tile_x0
-						screenY := (float64(tileY) * tileSize) - tile_y0
-
-						object.Sprite.Draw(screen, screenX, screenY, 1, 1)
-					}
+					obj.Sprite.Draw(screen, screenX, screenY, 1, 1)
 				}
 			}
 		}
@@ -106,67 +90,57 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 	if object == nil || object.Sprite == nil {
 		return
 	}
-	x, y := ebiten.CursorPosition()
-	bounds := screen.Bounds()
-	width, height := bounds.Dx(), bounds.Dy()
-	tileSize := float64(g.Map.Tilesize)
 
-	tile_x0 := g.Camera.X - (float64(width) / 2)
-	tile_y0 := g.Camera.Y - (float64(height) / 2)
+	cx, cy := ebiten.CursorPosition()
+	tileX, tileY := g.Camera.ScreenToTile(float64(cx), float64(cy), g.Map.Tilesize)
 
-	worldCursorX := tile_x0 + float64(x)
-	worldCursorY := tile_y0 + float64(y)
+	if tileX < 0 || tileY < 0 || tileX+object.SizeX > g.Map.MapSizeX || tileY+object.SizeY > g.Map.MapSizeY {
+		return
+	}
 
-	tileX := int(math.Floor(worldCursorX / tileSize))
-	tileY := int(math.Floor(worldCursorY / tileSize))
+	worldX := float64(tileX * g.Map.Tilesize)
+	worldY := float64(tileY * g.Map.Tilesize)
+	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-	screenX := (float64(tileX) * tileSize) - tile_x0
-	screenY := (float64(tileY) * tileSize) - tile_y0
-
+	oldAlpha := object.Sprite.Alpha
 	object.Sprite.SetAlpha(0.4)
-	object.Sprite.Draw(screen, screenX, screenY, 1, 1)
+	object.Sprite.Draw(screen, screenX, screenY, 1.0, 1.0)
+	object.Sprite.SetAlpha(oldAlpha)
 }
 
 func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
-	x, y := ebiten.CursorPosition()
-	bounds := screen.Bounds()
-	width, height := bounds.Dx(), bounds.Dy()
-	tileSize := float64(g.Map.Tilesize)
-
-	tile_x0 := g.Camera.X - (float64(width) / 2)
-	tile_y0 := g.Camera.Y - (float64(height) / 2)
-
-	worldCursorX := tile_x0 + float64(x)
-	worldCursorY := tile_y0 + float64(y)
-
-	tileX := int(math.Floor(worldCursorX / tileSize))
-	tileY := int(math.Floor(worldCursorY / tileSize))
+	cx, cy := ebiten.CursorPosition()
+	tileX, tileY := g.Camera.ScreenToTile(float64(cx), float64(cy), g.Map.Tilesize)
 
 	if tileX < 0 || tileX >= g.Map.MapSizeX || tileY < 0 || tileY >= g.Map.MapSizeY {
 		return
 	}
 
-	var object *engine.Object
-	for z := 0; z < 3; z++ {
-		if g.Map.Tiles[z][tileY][tileX] != nil {
-			object = g.Map.Tiles[z][tileY][tileX]
+	var target *engine.Object
+	for z := constants.MAP_LAYERS - 1; z >= 0; z-- {
+		if obj := g.Map.Tiles[z][tileY][tileX]; obj != nil {
+			target = obj
+			break
 		}
 	}
 
-	if object == nil {
+	if target == nil {
 		return
 	}
 
-	screenX := float32((float64(object.TileX) * tileSize) - tile_x0)
-	screenY := float32((float64(object.TileY) * tileSize) - tile_y0)
+	worldX := float64(target.TileX * g.Map.Tilesize)
+	worldY := float64(target.TileY * g.Map.Tilesize)
+	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
+
 	ts := float32(g.Map.Tilesize)
-
-	red := color.RGBA{0x88, 0x00, 0x00, 0xFF}
-
+	rectWidth := ts * float32(target.SizeX)
+	rectHeight := ts * float32(target.SizeY)
 	sX := float32(screenX)
 	sY := float32(screenY)
-	rectWidth := float32(ts) * float32(object.SizeX)
-	rectHeight := float32(ts) * float32(object.SizeY)
 
-	vector.StrokeRect(screen, sX, sY, rectWidth, rectHeight, 3, red, false)
+	fillRed := color.RGBA{0xFF, 0x00, 0x00, 0x44}
+	strokeRed := color.RGBA{0xFF, 0x22, 0x22, 0xEE}
+
+	vector.FillRect(screen, sX, sY, rectWidth, rectHeight, fillRed, false)
+	vector.StrokeRect(screen, sX, sY, rectWidth, rectHeight, 2, strokeRed, false)
 }
