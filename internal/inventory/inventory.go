@@ -46,3 +46,12 @@ func (i *Inventory) RemoveItem(item itemInterface, quantity int) {
 		}
 	}
 }
+
+func (i *Inventory) GetItemQuantity(item itemInterface) int {
+	for _, inventoryItem := range i.Items {
+		if inventoryItem.Item == item {
+			return inventoryItem.Quantity
+		}
+	}
+	return 0
+}

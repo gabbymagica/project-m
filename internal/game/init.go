@@ -16,8 +16,8 @@ import (
 func (g *Game) InitMap() {
 	g.Map = engine.NewMap(constants.TILESIZE)
 
-	grass := engine.NewObject("GRASS", 0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
-	copper := engine.NewObject("COPPER", 0, 0, 0, 1, 1, 200, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
+	grass := engine.NewObject(constants.TileGrass, constants.LAYER_GROUND, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
+	copper := engine.NewObject(constants.OreCopper, constants.LAYER_GROUND, 1, 1, 200, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
 
 	prioridades := map[*engine.Object]float32{
 		grass:  500,
@@ -48,6 +48,8 @@ func (g *Game) InitPlayer() {
 	g.Player.Y = float64(constants.LAYOUT_HEIGHT / 2)
 	g.Player.Mining.Range = 200
 	g.Player.Mining.MiningDelay = 1.0
+	g.Player.Mining.MinerableOres = []constants.GroundID{constants.OreCopper}
+
 }
 
 func (g *Game) InitUi() {

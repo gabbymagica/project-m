@@ -90,15 +90,12 @@ func GameSetup() *Game {
 	game.InitMap()
 	game.InitPlayer()
 	game.InitUi()
-
-	// Teste
-	game.Player.Inventory.AddItem(item.Manager.Cobre, 10)
-	// Teste
+	
 
 	el_quadrado_vermelho := ebiten.NewImage(16, 16)
 	el_quadrado_vermelho.Fill(color.RGBA{0xff, 0, 0, 0xff})
 
-	objeto := engine.NewObject("quadradovermelho", 4, 4, 1, 3, 3, 0, engine.NewSprite("quadradovermelho", "quadradovermelho", el_quadrado_vermelho))
+	objeto := engine.NewObject(constants.QuadradoVermelho, constants.LAYER_GROUND, 3, 3, 0, engine.NewSprite("quadradovermelho", "quadradovermelho", el_quadrado_vermelho))
 
 	game.Map.PutObject(objeto)
 

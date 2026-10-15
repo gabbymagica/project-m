@@ -17,6 +17,8 @@ type Mining struct {
 	Range       float64
 	MiningDelay float64
 	Timer       float64
+	MinerableOres 	[]constants.GroundID
+
 }
 
 type Building struct {
@@ -44,6 +46,7 @@ func (p *Player) UpdateMining(dt float64) {
 		objectY := float64(p.Mining.Object.TileY*constants.TILESIZE + constants.TILESIZE/2)
 		if engine.Distance(p.X, p.Y, objectX, objectY) > p.Mining.Range {
 			p.IsAction = false
+			p.Mining.Timer = 0
 			p.Mining.IsMining = false
 			p.Mining.Object = nil
 			return
@@ -52,10 +55,19 @@ func (p *Player) UpdateMining(dt float64) {
 		p.Mining.Timer += dt
 		if p.Mining.Timer >= p.Mining.MiningDelay {
 			p.Mining.Timer = 0
-			p.Inventory.AddItem(item.Manager.Cobre, 1)
+			p.Inventory.AddItem(item.Manager.Items[constants.ItemID(p.Mining.Object.ID)], 1)
 		}
 
 	}
+}
+
+func (p *Player) IsMinerable(ID constants.GroundID) bool {
+	for _, ore := range p.Mining.MinerableOres {
+		if ore == ID {
+			return true
+		}
+	}
+	return false
 }
 
 func (p *Player) StartMining(object *engine.Object) {
@@ -65,7 +77,6 @@ func (p *Player) StartMining(object *engine.Object) {
 		p.Mining.IsMining = true
 		p.IsAction = true
 		p.Mining.Object = object
-		p.Mining.Timer = 0
 	}
 }
 
@@ -87,3 +98,5 @@ func (p *Player) Draw(screen *ebiten.Image, camera *engine.Camera) {
 			3, color.RGBA{0xFF, 0x00, 0x00, 0xFF}, false)
 	}
 }
+
+

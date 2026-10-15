@@ -31,7 +31,7 @@ func (g *Game) inputMouse() {
 				if object != nil {
 					switch layer {
 					case constants.LAYER_GROUND:
-						if object.ID == "COPPER" {
+						if g.Player.IsMinerable(object.ID) {
 							g.Player.StartMining(object)
 						}
 						break verifyLayers

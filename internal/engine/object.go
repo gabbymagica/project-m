@@ -20,11 +20,11 @@ type Object struct {
 	Layer             int
 }
 
-func NewObject(id string, tileX, tileY int, layer int, sizeX, sizeY int, clusterMultiplier float32, sprite *Sprite) *Object {
+func NewObject(id constants.GroundID, layer int, sizeX, sizeY int, clusterMultiplier float32, sprite *Sprite) *Object {
 	return &Object{
 		ID:                id,
-		TileX:             tileX,
-		TileY:             tileY,
+		TileX:             0,
+		TileY:             0,
 		Layer:             layer,
 		SizeX:             sizeX,
 		SizeY:             sizeY,
