@@ -1,4 +1,4 @@
-package inventoryUi
+package ui
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 
 type StateDragDrop struct {
 	Active bool
-	Item *inventory.InventorySlot
+	Item   *inventory.InventorySlot
 }
 
 type InventoryUI struct {
@@ -24,15 +24,12 @@ type InventoryUI struct {
 	StartY     float64
 	Spacing    int
 
-	StateDragDrop StateDragDrop
-	Open bool
+	StateDragDrop       StateDragDrop
+	Open                bool
 	SpritesInstantiated []*sprite.Sprite
 }
 
 func (ui *InventoryUI) Instantiate() {
-
-	ui.Font = engine.LoadFont("fonts/Pix32.ttf")
-
 	for range len(ui.Data.Items) {
 		sprite := ui.SpriteSlot.Instantiate()
 
@@ -49,7 +46,7 @@ func (ui *InventoryUI) Instantiate() {
 
 // 		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
 // 			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
-			
+
 // 			if item.Item == nil {
 // 				break
 // 			}
@@ -74,7 +71,7 @@ func (ui *InventoryUI) Instantiate() {
 
 // 		if mouseX >= sprite.X && mouseX <= sprite.X+sprite.Image.Bounds().Dx() &&
 // 			mouseY >= sprite.Y && mouseY <= sprite.Y+sprite.Image.Bounds().Dy() {
-			
+
 // 			itemTrocado := ui.Data.Items[index]
 // 			ui.Data.Items[index] = *ui.StateDragDrop.Item;
 // 			*ui.StateDragDrop.Item = itemTrocado
@@ -87,25 +84,24 @@ func (ui *InventoryUI) Instantiate() {
 // 	ui.StateDragDrop.Item = nil
 // }
 
-
 func (ui *InventoryUI) Draw(screen *ebiten.Image) {
 	screenWidth, screenHeight := screen.Bounds().Dx(), screen.Bounds().Dy()
 
-	ui.StartX = float64(screenWidth - (9*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dx()) - ui.Spacing)) / 2
+	ui.StartX = float64(screenWidth-(9*(ui.Spacing+ui.SpriteSlot.Image.Bounds().Dx())-ui.Spacing)) / 2
 	ui.StartY = float64(screenHeight) - float64(ui.SpriteSlot.Image.Bounds().Dy()) - 10
 
-	for index, item := range ui.Data.Items  {
+	for index, item := range ui.Data.Items {
 		if index == 9 {
 			if !ui.Open {
 				break
-			} 
+			}
 			ui.StartY = 200
-		} 
- 
+		}
+
 		sprite := ui.SpritesInstantiated[index]
 
-		spriteX := ui.StartX + float64(index % 9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dx()))
-		spriteY := ui.StartY + float64(index / 9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dy()))
+		spriteX := ui.StartX + float64(index%9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dx()))
+		spriteY := ui.StartY + float64(index/9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dy()))
 
 		sprite.Draw(screen, spriteX, spriteY, 1.0, 1.0)
 
@@ -120,7 +116,7 @@ func (ui *InventoryUI) Draw(screen *ebiten.Image) {
 			engine.DrawText(screen, ui.Font, fmt.Sprintf("%d", item.Quantity), float64(int(spriteX+10)), float64(int(spriteY+6)), 12, color.White)
 
 		}
-		
+
 	}
 
 	// if ui.StateDragDrop.Active && ui.StateDragDrop.Item != nil {

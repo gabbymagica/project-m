@@ -2,15 +2,22 @@ package engine
 
 import "errors"
 
+type ObjectText struct {
+	Hover bool
+	Text  string
+}
+
 type Object struct {
-	ID                string
+	ID     string
+	SizeX  int
+	SizeY  int
+	Sprite *Sprite
+
+	ClusterMultiplier float32
+	ObjectText        *ObjectText
 	TileX             int
 	TileY             int
 	Layer             int
-	SizeX             int
-	SizeY             int
-	ClusterMultiplier float32
-	Sprite            *Sprite
 }
 
 func NewObject(id string, tileX, tileY int, layer int, sizeX, sizeY int, clusterMultiplier float32, sprite *Sprite) *Object {
@@ -23,6 +30,7 @@ func NewObject(id string, tileX, tileY int, layer int, sizeX, sizeY int, cluster
 		SizeY:             sizeY,
 		ClusterMultiplier: clusterMultiplier,
 		Sprite:            sprite,
+		ObjectText:        &ObjectText{},
 	}
 }
 
@@ -34,7 +42,6 @@ func (o *Object) Clone() *Object {
 }
 
 func (m *Map) PutObject(object *Object) error {
-
 	if object.TileX+object.SizeX > m.MapSizeX || object.TileY+object.SizeY > m.MapSizeY {
 		return errors.New("objeto out of bounds")
 	}
