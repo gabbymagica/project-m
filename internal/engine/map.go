@@ -2,26 +2,42 @@ package engine
 
 import (
 	"math/rand"
-	"project_m/internal/constants"
 )
 
 
 type Map struct {
-	Tiles              [constants.MAP_LAYERS][32][100]*Object
+	Tiles	    	[][]*Tile	// Camada de Tiles do chão
+	
+	Builds 			[][]*Build 	// Camada de builds para otimização de busca.
+	BuildsList		[]Build		// Lista de builds para otimização de renderização.
+
 	MapSizeX, MapSizeY int
 	Tilesize           int
 }
 
-func NewMap(tilesize int) *Map {
+func NewMap(tilesize int, sizeX, sizeY int) *Map {
+	
+	tiles := make([][]*Tile, sizeY)
+	build := make([][]*Build, sizeY)
+
+
+	for y := 0; y < sizeY; y++ {
+		tiles[y] = make([]*Tile, sizeX)
+		build[y] = make([]*Build, sizeX)
+	}
+	
+
+	
 	return &Map{
-		Tiles:    [constants.MAP_LAYERS][32][100]*Object{},
-		MapSizeY: 32,
-		MapSizeX: 100,
-		Tilesize: tilesize,
+		Tiles:      tiles,
+		Builds:     build,
+		MapSizeY:   sizeY,
+		MapSizeX:   sizeX,
+		Tilesize:   tilesize,
 	}
 }
 
-func (m *Map) GenerateMap(priorities map[*Object]float32) {
+func (m *Map) GenerateMap(priorities map[*AutoGenerateTile]float32) {
 	posicoes := [][2]int{
 		{0, -1},
 		{-1, 0},
@@ -29,7 +45,7 @@ func (m *Map) GenerateMap(priorities map[*Object]float32) {
 		{-1, 1},
 	}
 
-	prioridadesLocais := make(map[*Object]float32)
+	prioridadesLocais := make(map[*AutoGenerateTile]float32)
 
 	for y := 0; y < m.MapSizeY; y++ {
 		for x := 0; x < m.MapSizeX; x++ {
@@ -38,43 +54,48 @@ func (m *Map) GenerateMap(priorities map[*Object]float32) {
 
 			var prioridadeTotal float32 = 0.0
 
-			for object, priority := range priorities {
-				prioridadesLocais[object] = priority
+			for tile, priority := range priorities {
+				prioridadesLocais[tile] = priority
 
 				for _, p := range posicoes {
 					ny := y + p[0]
 					nx := x + p[1]
 
-					if ny < 0 || ny >= m.MapSizeY || nx < 0 || nx >= m.MapSizeX || m.Tiles[0][ny][nx] == nil {
+					if ny < 0 || ny >= m.MapSizeY || nx < 0 || nx >= m.MapSizeX || m.Tiles[ny][nx] == nil {
 						continue
 					}
 
-					object2 := m.Tiles[0][ny][nx]
+					tile2 := m.Tiles[ny][nx]
 
-					if object2.ID == object.ID {
-						prioridadesLocais[object] += object.ClusterMultiplier
+					if tile2.ID == tile.Tile.ID {
+						prioridadesLocais[tile] += tile.ClusterMultiplier
 					}
 				}
 
-				prioridadeTotal += prioridadesLocais[object]
+				prioridadeTotal += prioridadesLocais[tile]
 			}
 
 			i := float32(rand.Intn(int(prioridadeTotal)) + 1)
 
-			for object, priority := range prioridadesLocais {
+			for tile, priority := range prioridadesLocais {
 				i -= priority
 
 				if i <= 0 {
 
-					object := object.Clone()
-					object.TileX = x
-					object.TileY = y
 
-					m.PutObject(object)
+
+					m.PutTile(tile.Tile, x, y)
 
 					break
 				}
 			}
 		}
 	}
+}
+
+func (m *Map) PutTile(tile *Tile, x, y int) {
+	if x < 0 || x >= m.MapSizeX || y < 0 || y >= m.MapSizeY {
+		return
+	}
+	m.Tiles[y][x] = tile
 }
