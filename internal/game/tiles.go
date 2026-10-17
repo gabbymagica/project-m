@@ -2,9 +2,7 @@ package game
 
 import (
 	"image/color"
-	"project_m/internal/constants"
 	"project_m/internal/engine"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -13,9 +11,9 @@ func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
 	if g.RenderFlags.ShowSprites {
 		g.DrawTileSprites(screen)
 	}
-	if g.GameMode == ModeBuilding {
-		g.DrawSpritePreview(screen, g.TestObject)
-	}
+	// if g.GameMode == ModeBuilding {
+	// 	g.DrawSpritePreview(screen, g.TestObject)
+	// }
 	if g.GameMode == ModeDestroying {
 		g.DrawDestroyingPreview(screen)
 	}
@@ -66,35 +64,33 @@ func (g *Game) DrawTileBorders(screen *ebiten.Image) {
 func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 	minX, minY, maxX, maxY := g.Camera.VisibleTileBounds(g.Map.Tilesize, g.Map.MapSizeX, g.Map.MapSizeY)
 
-	for z := 0; z < constants.MAP_LAYERS; z++ {
-		for tileY := minY; tileY < maxY; tileY++ {
-			for tileX := minX; tileX < maxX; tileX++ {
-				obj := g.Map.Tiles[z][tileY][tileX]
-				if obj == nil || obj.Sprite == nil {
-					continue
-				}
-
-				if obj.TileX == tileX && obj.TileY == tileY {
-					worldX := float64(tileX * g.Map.Tilesize)
-					worldY := float64(tileY * g.Map.Tilesize)
-					screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
-
-					obj.Sprite.Draw(screen, screenX, screenY, 1, 1)
-				}
+	for tileY := minY; tileY < maxY; tileY++ {
+		for tileX := minX; tileX < maxX; tileX++ {
+			tile := g.Map.Tiles[tileY][tileX]
+			if tile == nil || tile.Sprite == nil {
+				continue
 			}
+
+			worldX := float64(tileX * g.Map.Tilesize)
+			worldY := float64(tileY * g.Map.Tilesize)
+			screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
+
+			tile.Sprite.Draw(screen, screenX, screenY, 1, 1)
+			
 		}
 	}
+	
 }
 
-func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
-	if object == nil || object.Sprite == nil {
+func (g *Game) DrawSpritePreview(screen *ebiten.Image, build *engine.Build) {
+	if build == nil || build.Sprite == nil {
 		return
 	}
 
 	cx, cy := ebiten.CursorPosition()
 	tileX, tileY := g.Camera.ScreenToTile(float64(cx), float64(cy), g.Map.Tilesize)
 
-	if tileX < 0 || tileY < 0 || tileX+object.SizeX > g.Map.MapSizeX || tileY+object.SizeY > g.Map.MapSizeY {
+	if tileX < 0 || tileY < 0 || tileX+build.SizeX > g.Map.MapSizeX || tileY+build.SizeY > g.Map.MapSizeY {
 		return
 	}
 
@@ -102,10 +98,10 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, object *engine.Object) {
 	worldY := float64(tileY * g.Map.Tilesize)
 	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-	oldAlpha := object.Sprite.Alpha
-	object.Sprite.SetAlpha(0.4)
-	object.Sprite.Draw(screen, screenX, screenY, 1.0, 1.0)
-	object.Sprite.SetAlpha(oldAlpha)
+	oldAlpha := build.Sprite.Alpha
+	build.Sprite.SetAlpha(0.4)
+	build.Sprite.Draw(screen, screenX, screenY, 1.0, 1.0)
+	build.Sprite.SetAlpha(oldAlpha)
 }
 
 func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
@@ -116,20 +112,18 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 		return
 	}
 
-	var target *engine.Object
-	for z := constants.MAP_LAYERS - 1; z >= 0; z-- {
-		if obj := g.Map.Tiles[z][tileY][tileX]; obj != nil {
-			target = obj
-			break
-		}
+	var target *engine.Build
+	if obj := g.Map.Builds[tileY][tileX]; obj != nil {
+		target = obj
 	}
+	
 
 	if target == nil {
 		return
 	}
 
-	worldX := float64(target.TileX * g.Map.Tilesize)
-	worldY := float64(target.TileY * g.Map.Tilesize)
+	worldX := float64(tileX * g.Map.Tilesize)
+	worldY := float64(tileY * g.Map.Tilesize)
 	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
 	ts := float32(g.Map.Tilesize)

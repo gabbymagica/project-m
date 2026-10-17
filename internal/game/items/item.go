@@ -2,14 +2,14 @@ package item
 
 import (
 	"project_m/assets"
+	"project_m/internal/constants"
 	"project_m/internal/engine"
-	sprite "project_m/internal/engine"
 )
 
 type Item struct {
-	ID     string
+	ID     int
 	Name   string
-	Sprite *sprite.Sprite
+	Sprite *engine.Sprite
 }
 
 func (i *Item) Instantiate() *Item {
@@ -22,7 +22,7 @@ func (i *Item) Instantiate() *Item {
 	return &item
 }
 
-func (i *Item) GetSprite() *sprite.Sprite {
+func (i *Item) GetSprite() *engine.Sprite {
 	if i.Sprite == nil {
 		return nil
 	}
@@ -33,14 +33,14 @@ func (i *Item) GetName() string {
 	return i.Name
 }
 
-func CreateItem(id string, name string, spritePath string) *Item {
+func CreateItem(id int, name string, spritePath string) *Item {
 	Image := assets.LoadImage(spritePath)
 
 	return &Item{
 		ID:   id,
 		Name: name,
 		Sprite: engine.NewSprite(
-			id,
+			name,
 			name,
 			Image,
 		),
@@ -48,14 +48,16 @@ func CreateItem(id string, name string, spritePath string) *Item {
 }
 
 type ItemManager struct {
-	Cobre *Item
+	Items map[constants.ItemID]*Item
 }
 
 func NewItemManager() *ItemManager {
-	return &ItemManager{
-		Cobre: CreateItem("cobre", "Cobre", "ores/copper.png"),
+	manager := &ItemManager{
+		Items: make(map[constants.ItemID]*Item),
 	}
+
+	manager.Items[constants.ItemCopper] = CreateItem(int(constants.ItemCopper), "Copper", "ores/copper.png")
+	return manager
 }
 
 var Manager *ItemManager = NewItemManager()
-

@@ -1,25 +1,23 @@
 package game
 
 import (
-	"image/color"
 	"project_m/assets"
 	"project_m/internal/constants"
 	"project_m/internal/display/ui"
 	inventoryUi "project_m/internal/display/ui"
 	"project_m/internal/engine"
 	"project_m/internal/game/entities/player"
+	"project_m/internal/game/load"
 	"project_m/internal/inventory"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 func (g *Game) InitMap() {
-	g.Map = engine.NewMap(constants.TILESIZE)
+	g.Map = engine.NewMap(constants.TILESIZE, 100, 30)
 
-	grass := engine.NewObject("GRASS", 0, 0, 0, 1, 1, 10, engine.NewSprite("grass", "grass", assets.LoadImage("tiles/grass.png")))
-	copper := engine.NewObject("COPPER", 0, 0, 0, 1, 1, 200, engine.NewSprite("copper_tile", "copper_tile", assets.LoadImage("tiles/copper.png")))
+	grass := engine.NewAutoGenerateTile(load.TILES[constants.TileGrass], 20)
+	copper := engine.NewAutoGenerateTile(load.TILES[constants.TileOreCopper], 200)
 
-	prioridades := map[*engine.Object]float32{
+	prioridades := map[*engine.AutoGenerateTile]float32{
 		grass:  500,
 		copper: 1,
 	}
@@ -28,26 +26,26 @@ func (g *Game) InitMap() {
 }
 
 func (g *Game) InitPlayer() {
-	el_quadrado_preto := ebiten.NewImage(32, 32)
-	el_quadrado_preto.Fill(color.RGBA{0, 0, 0, 0xff})
-	spritePlayer := engine.NewSprite("player", "player", el_quadrado_preto)
+	
 
 	inventory := &inventory.Inventory{}
 
 	g.Player = &player.Player{
 		Inventory: inventory,
 	}
-	g.Player.Sprite = spritePlayer
+	g.Player.Sprite = load.PLAYER_SPRITES["main"]
 	g.Player.Speed = 5
 	g.Player.IsAction = false
 	g.Player.Mining = &player.Mining{
 		IsMining: false,
-		Object:   nil,
+		TargetTile:   nil,
 	}
 	g.Player.X = float64(constants.LAYOUT_WIDTH / 2)
 	g.Player.Y = float64(constants.LAYOUT_HEIGHT / 2)
 	g.Player.Mining.Range = 200
 	g.Player.Mining.MiningDelay = 1.0
+	g.Player.Mining.MinerableOres = []constants.TileID{constants.TileOreCopper}
+
 }
 
 func (g *Game) InitUi() {
