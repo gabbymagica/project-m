@@ -4,36 +4,31 @@ import (
 	"math/rand"
 )
 
-
 type Map struct {
-	Tiles	    	[][]*Tile	// Camada de Tiles do chão
-	
-	Builds 			[][]*Build 	// Camada de builds para otimização de busca.
-	BuildsList		[]Build		// Lista de builds para otimização de renderização.
+	Tiles [][]*Tile // Camada de Tiles do chão
+
+	Builds     [][]*Build // Camada de builds para otimização de busca.
+	BuildsList []*Build   // Lista de builds para otimização de renderização.
 
 	MapSizeX, MapSizeY int
 	Tilesize           int
 }
 
 func NewMap(tilesize int, sizeX, sizeY int) *Map {
-	
 	tiles := make([][]*Tile, sizeY)
 	build := make([][]*Build, sizeY)
-
 
 	for y := 0; y < sizeY; y++ {
 		tiles[y] = make([]*Tile, sizeX)
 		build[y] = make([]*Build, sizeX)
 	}
-	
 
-	
 	return &Map{
-		Tiles:      tiles,
-		Builds:     build,
-		MapSizeY:   sizeY,
-		MapSizeX:   sizeX,
-		Tilesize:   tilesize,
+		Tiles:    tiles,
+		Builds:   build,
+		MapSizeY: sizeY,
+		MapSizeX: sizeX,
+		Tilesize: tilesize,
 	}
 }
 
@@ -82,8 +77,6 @@ func (m *Map) GenerateMap(priorities map[*AutoGenerateTile]float32) {
 
 				if i <= 0 {
 
-
-
 					m.PutTile(tile.Tile, x, y)
 
 					break
@@ -98,4 +91,37 @@ func (m *Map) PutTile(tile *Tile, x, y int) {
 		return
 	}
 	m.Tiles[y][x] = tile
+}
+
+func (m *Map) PutBuilding(buildType *BuildType, x, y int) *Build {
+	if x < 0 || x >= m.MapSizeX || y < 0 || y >= m.MapSizeY {
+		return nil
+	}
+
+	// verificacao
+	for iplison := y; iplison < y+buildType.SizeY; iplison++ {
+		for xis := x; xis < x+buildType.SizeX; xis++ {
+			if m.Builds[iplison][xis] != nil {
+				return nil
+			}
+		}
+	}
+
+	buildInstance := &Build{
+		BuildType:        buildType,
+		TileX:            x,
+		TileY:            y,
+		BuildProgress:    0,
+		FinishedBuilding: false,
+	}
+
+	// colocacao ..?
+	for iplison := y; iplison < y+buildType.SizeY; iplison++ {
+		for xis := x; xis < x+buildType.SizeX; xis++ {
+			m.Builds[iplison][xis] = buildInstance
+		}
+	}
+
+	m.BuildsList = append(m.BuildsList)
+	return buildInstance
 }

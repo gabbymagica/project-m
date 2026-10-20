@@ -3,18 +3,21 @@ package game
 import (
 	"image/color"
 	"project_m/internal/engine"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
-func (g *Game) HandleTileDrawStates(screen *ebiten.Image) {
+func (g *Game) HandleRenderFlags(screen *ebiten.Image) {
 	if g.RenderFlags.ShowSprites {
 		g.DrawTileSprites(screen)
 	}
-	// if g.GameMode == ModeBuilding {
-	// 	g.DrawSpritePreview(screen, g.TestObject)
-	// }
-	if g.GameMode == ModeDestroying {
+	if g.RenderFlags.ShowBuildPreview {
+		if g.Player.Building.SelectedBuildType != nil {
+			g.DrawSpritePreview(screen, g.Player.Building.SelectedBuildType)
+		}
+	}
+	if g.RenderFlags.ShowDestroyPreview {
 		g.DrawDestroyingPreview(screen)
 	}
 	if g.RenderFlags.ShowTileBorders {
@@ -76,14 +79,14 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 			screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
 			tile.Sprite.Draw(screen, screenX, screenY, 1, 1)
-			
+
 		}
 	}
-	
+
 }
 
-func (g *Game) DrawSpritePreview(screen *ebiten.Image, build *engine.Build) {
-	if build == nil || build.Sprite == nil {
+func (g *Game) DrawSpritePreview(screen *ebiten.Image, build *engine.BuildType) {
+	if build.Sprite == nil {
 		return
 	}
 
@@ -116,7 +119,6 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 	if obj := g.Map.Builds[tileY][tileX]; obj != nil {
 		target = obj
 	}
-	
 
 	if target == nil {
 		return
@@ -127,8 +129,8 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
 	ts := float32(g.Map.Tilesize)
-	rectWidth := ts * float32(target.SizeX)
-	rectHeight := ts * float32(target.SizeY)
+	rectWidth := ts * float32(target.BuildType.SizeX)
+	rectHeight := ts * float32(target.BuildType.SizeY)
 	sX := float32(screenX)
 	sY := float32(screenY)
 
