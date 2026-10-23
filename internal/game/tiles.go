@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"image/color"
 	"project_m/internal/engine"
 
@@ -16,6 +17,9 @@ func (g *Game) HandleRenderFlags(screen *ebiten.Image) {
 		if g.Player.Building.SelectedBuildType != nil {
 			g.DrawSpritePreview(screen, g.Player.Building.SelectedBuildType)
 		}
+	}
+	if g.RenderFlags.ShowBuildSprites {
+		g.DrawBuildSprites(screen)
 	}
 	if g.RenderFlags.ShowDestroyPreview {
 		g.DrawDestroyingPreview(screen)
@@ -82,7 +86,21 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 
 		}
 	}
+}
 
+func (g *Game) DrawBuildSprites(screen *ebiten.Image) {
+	for _, build := range g.Map.BuildsList {
+		fmt.Printf("Build: %+v\n", build)
+		if build.BuildType.Sprite == nil {
+			continue
+		}
+
+		worldX := float64(build.TileX * g.Map.Tilesize)
+		worldY := float64(build.TileY * g.Map.Tilesize)
+		screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
+
+		build.BuildType.Sprite.Draw(screen, screenX, screenY, 1, 1)
+	}
 }
 
 func (g *Game) DrawSpritePreview(screen *ebiten.Image, build *engine.BuildType) {

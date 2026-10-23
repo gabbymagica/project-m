@@ -75,7 +75,8 @@ func GameSetup() *Game {
 	game := &Game{}
 
 	game.RenderFlags = &RenderFlags{
-		ShowSprites: true,
+		ShowSprites:      true,
+		ShowBuildSprites: true,
 	}
 
 	game.Camera = &engine.Camera{

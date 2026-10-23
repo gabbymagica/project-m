@@ -122,6 +122,6 @@ func (m *Map) PutBuilding(buildType *BuildType, x, y int) *Build {
 		}
 	}
 
-	m.BuildsList = append(m.BuildsList)
+	m.BuildsList = append(m.BuildsList, buildInstance)
 	return buildInstance
 }

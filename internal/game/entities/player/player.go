@@ -1,6 +1,7 @@
 package player
 
 import (
+	"fmt"
 	"image/color"
 	"project_m/internal/constants"
 	"project_m/internal/engine"
@@ -40,6 +41,7 @@ type Player struct {
 
 func (p *Player) Update(dt float64) {
 	p.UpdateMining(dt)
+	p.UpdateBuilding(dt)
 }
 
 func (p *Player) UpdateMining(dt float64) {
@@ -56,7 +58,26 @@ func (p *Player) UpdateMining(dt float64) {
 			p.Mining.Timer = 0
 			p.Inventory.AddItem(item.Manager.Items[constants.ItemID(p.Mining.TargetTile.ID)], 1)
 		}
+	}
+}
 
+func (p *Player) UpdateBuilding(dt float64) {
+	var buildTarget = p.Building.BuildTarget
+	if buildTarget == nil {
+		return
+	}
+	if p.Action == constants.Building && buildTarget.FinishedBuilding == false {
+		if p.CanBuild(buildTarget.TileX, buildTarget.TileY) == false {
+			fmt.Println("loooonge")
+			p.StopBuilding()
+			return
+		}
+
+		buildTarget.BuildProgress += dt
+		if buildTarget.BuildProgress >= p.Building.SelectedBuildType.BuildingTimeSeconds {
+			buildTarget.FinishedBuilding = true
+			p.StopBuilding()
+		}
 	}
 }
 
@@ -76,9 +97,14 @@ func (p *Player) CanMine(tileX, tileY int) bool {
 }
 
 func (p *Player) CanBuild(tileX, tileY int) bool {
-	absX := float64(tileX*constants.TILESIZE + constants.TILESIZE/2)
-	absY := float64(tileY*constants.TILESIZE + constants.TILESIZE/2)
-	return engine.Distance(p.X, p.Y, absX, absY) <= p.Building.Range
+	if p.Building.SelectedBuildType == nil {
+		return false
+	}
+
+	var buildType = p.Building.SelectedBuildType
+	objectX := float64((tileX * constants.TILESIZE) + ((buildType.SizeX * constants.TILESIZE) / 2))
+	objectY := float64((tileY * constants.TILESIZE) + ((buildType.SizeY * constants.TILESIZE) / 2))
+	return engine.Distance(p.X, p.Y, objectX, objectY) <= p.Building.Range
 }
 
 func (p *Player) StartMining(tile *engine.Tile, tileX, tileY int) {
@@ -98,10 +124,12 @@ func (p *Player) StopMining() {
 
 func (p *Player) StartBuilding(build *engine.Build) {
 	p.Action = constants.Building
+	p.Building.BuildTarget = build
 }
 
 func (p *Player) StopBuilding() {
-
+	p.Action = constants.Idling
+	p.Building.BuildTarget = nil
 }
 
 func (p *Player) Draw(screen *ebiten.Image, camera *engine.Camera) {

@@ -5,18 +5,18 @@ import (
 )
 
 type Sprite struct {
-	ID             string
-	Name           string
-	Image          *ebiten.Image
-	Alpha          float32
+	ID    string
+	Name  string
+	Image *ebiten.Image
+	Alpha float32
 }
 
 func NewSprite(id, name string, image *ebiten.Image) *Sprite {
 	return &Sprite{
-		ID:     id,
-		Name:   name,
-		Image:  image,
-		Alpha:  1.0,
+		ID:    id,
+		Name:  name,
+		Image: image,
+		Alpha: 1.0,
 	}
 }
 
@@ -30,11 +30,11 @@ func (s *Sprite) SetAlpha(alpha float32) {
 	s.Alpha = alpha
 }
 
-func (s *Sprite) Draw(screen *ebiten.Image, x, y float64, scaleX, scaleY float64, ) {
+func (s *Sprite) Draw(screen *ebiten.Image, x, y float64, scaleX, scaleY float64) {
 	if s == nil || s.Image == nil || screen == nil {
 		return
 	}
- 
+
 	op := &ebiten.DrawImageOptions{}
 	op.ColorScale.ScaleAlpha(s.Alpha)
 	op.GeoM.Scale(scaleX, scaleY)

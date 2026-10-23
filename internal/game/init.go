@@ -35,13 +35,16 @@ func (g *Game) InitPlayer() {
 	g.Player.Speed = 5
 	g.Player.Action = constants.Idling
 	g.Player.Mining = &player.Mining{
-		TargetTile: nil,
+		Range:         200,
+		MiningDelay:   1.0,
+		TargetTile:    nil,
+		MinerableOres: []constants.TileID{constants.TileOreCopper},
+	}
+	g.Player.Building = &player.Building{
+		Range: 200,
 	}
 	g.Player.X = float64(constants.LAYOUT_WIDTH / 2)
 	g.Player.Y = float64(constants.LAYOUT_HEIGHT / 2)
-	g.Player.Mining.Range = 200
-	g.Player.Mining.MiningDelay = 1.0
-	g.Player.Mining.MinerableOres = []constants.TileID{constants.TileOreCopper}
 }
 
 func (g *Game) InitUi() {

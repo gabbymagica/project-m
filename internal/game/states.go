@@ -5,4 +5,5 @@ type RenderFlags struct {
 	ShowSprites        bool
 	ShowBuildPreview   bool
 	ShowDestroyPreview bool
+	ShowBuildSprites   bool
 }
