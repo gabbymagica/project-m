@@ -34,13 +34,16 @@ func (g *Game) InitPlayer() {
 	g.Player.Sprite = load.PLAYER_SPRITES["main"]
 	g.Player.Speed = 5
 	g.Player.Action = constants.Idling
-	g.Player.Mining = &player.Mining{
+	g.Player.Mining = player.Mining{
 		Range:         200,
 		MiningDelay:   1.0,
 		TargetTile:    nil,
 		MinerableOres: []constants.TileID{constants.TileOreCopper},
 	}
-	g.Player.Building = &player.Building{
+	g.Player.Building = player.Building{
+		Range: 200,
+	}
+	g.Player.Destroying = player.Destroying{
 		Range: 200,
 	}
 	g.Player.X = float64(constants.LAYOUT_WIDTH / 2)

@@ -18,6 +18,7 @@ type Build struct {
 	TileX, TileY     int
 	BuildProgress    float64
 	FinishedBuilding bool
+	Destroyed        bool
 }
 
 func NewBuildType(id constants.BuildID, solid bool, sizeX, sizeY int, sprite *Sprite, bts float64) *BuildType {
@@ -29,4 +30,14 @@ func NewBuildType(id constants.BuildID, solid bool, sizeX, sizeY int, sprite *Sp
 		Sprite:              sprite,
 		BuildingTimeSeconds: bts,
 	}
+}
+
+func (bt *BuildType) CenterPosition(tileX, tileY, tileSize int) (float64, float64) {
+	x := float64(tileX*tileSize) + float64(bt.SizeX*tileSize)/2
+	y := float64(tileY*tileSize) + float64(bt.SizeY*tileSize)/2
+	return x, y
+}
+
+func (b *Build) CenterPosition(tileSize int) (float64, float64) {
+	return b.BuildType.CenterPosition(b.TileX, b.TileY, tileSize)
 }

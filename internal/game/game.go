@@ -23,7 +23,7 @@ type Game struct {
 	Inputs        []ebiten.Key
 	BuildTypeList []*engine.BuildType
 
-	RenderFlags *RenderFlags
+	RenderFlags RenderFlags
 
 	ItemManager *item.ItemManager
 
@@ -54,6 +54,7 @@ func (g *Game) Update() error {
 
 	g.HandleGameInputs()
 	g.Player.Update(g.deltaTime)
+	g.Map.Update()
 	g.Camera.Follow(g.Player.X, g.Player.Y)
 	return nil
 }
@@ -74,7 +75,7 @@ func GameSetup() *Game {
 
 	game := &Game{}
 
-	game.RenderFlags = &RenderFlags{
+	game.RenderFlags = RenderFlags{
 		ShowSprites:      true,
 		ShowBuildSprites: true,
 	}

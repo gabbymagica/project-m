@@ -1,8 +1,8 @@
 package game
 
 import (
-	"fmt"
 	"image/color"
+	"project_m/internal/constants"
 	"project_m/internal/engine"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,10 +10,11 @@ import (
 )
 
 func (g *Game) HandleRenderFlags(screen *ebiten.Image) {
+	//fmt.Printf("Render flags: %+v\n", g.RenderFlags)
 	if g.RenderFlags.ShowSprites {
 		g.DrawTileSprites(screen)
 	}
-	if g.RenderFlags.ShowBuildPreview {
+	if g.Player.Action == constants.PreviewBuilding {
 		if g.Player.Building.SelectedBuildType != nil {
 			g.DrawSpritePreview(screen, g.Player.Building.SelectedBuildType)
 		}
@@ -21,7 +22,7 @@ func (g *Game) HandleRenderFlags(screen *ebiten.Image) {
 	if g.RenderFlags.ShowBuildSprites {
 		g.DrawBuildSprites(screen)
 	}
-	if g.RenderFlags.ShowDestroyPreview {
+	if g.Player.Action == constants.PreviewDestroying {
 		g.DrawDestroyingPreview(screen)
 	}
 	if g.RenderFlags.ShowTileBorders {
@@ -82,16 +83,22 @@ func (g *Game) DrawTileSprites(screen *ebiten.Image) {
 			worldY := float64(tileY * g.Map.Tilesize)
 			screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-			tile.Sprite.Draw(screen, screenX, screenY, 1, 1)
+			tile.Sprite.Draw(screen, screenX, screenY, 1, 1, 1.0)
 
 		}
 	}
 }
 
 func (g *Game) DrawBuildSprites(screen *ebiten.Image) {
+	minX, minY, maxX, maxY := g.Camera.VisibleTileBounds(g.Map.Tilesize, g.Map.MapSizeX, g.Map.MapSizeY)
 	for _, build := range g.Map.BuildsList {
-		fmt.Printf("Build: %+v\n", build)
+		//fmt.Printf("Build: %+v\n", build)
 		if build.BuildType.Sprite == nil {
+			continue
+		}
+
+		if build.TileX+build.BuildType.SizeX < minX || build.TileX > maxX ||
+			build.TileY+build.BuildType.SizeY < minY || build.TileY > maxY {
 			continue
 		}
 
@@ -99,7 +106,7 @@ func (g *Game) DrawBuildSprites(screen *ebiten.Image) {
 		worldY := float64(build.TileY * g.Map.Tilesize)
 		screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-		build.BuildType.Sprite.Draw(screen, screenX, screenY, 1, 1)
+		build.BuildType.Sprite.Draw(screen, screenX, screenY, 1, 1, float32(build.BuildProgress/build.BuildType.BuildingTimeSeconds))
 	}
 }
 
@@ -119,10 +126,7 @@ func (g *Game) DrawSpritePreview(screen *ebiten.Image, build *engine.BuildType) 
 	worldY := float64(tileY * g.Map.Tilesize)
 	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
-	oldAlpha := build.Sprite.Alpha
-	build.Sprite.SetAlpha(0.4)
-	build.Sprite.Draw(screen, screenX, screenY, 1.0, 1.0)
-	build.Sprite.SetAlpha(oldAlpha)
+	build.Sprite.Draw(screen, screenX, screenY, 1.0, 1.0, 0.4)
 }
 
 func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
@@ -142,8 +146,8 @@ func (g *Game) DrawDestroyingPreview(screen *ebiten.Image) {
 		return
 	}
 
-	worldX := float64(tileX * g.Map.Tilesize)
-	worldY := float64(tileY * g.Map.Tilesize)
+	worldX := float64(target.TileX * g.Map.Tilesize)
+	worldY := float64(target.TileY * g.Map.Tilesize)
 	screenX, screenY := g.Camera.WorldToScreen(worldX, worldY)
 
 	ts := float32(g.Map.Tilesize)

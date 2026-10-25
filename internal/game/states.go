@@ -1,9 +1,9 @@
 package game
 
 type RenderFlags struct {
-	ShowTileBorders    bool
-	ShowSprites        bool
-	ShowBuildPreview   bool
-	ShowDestroyPreview bool
-	ShowBuildSprites   bool
+	ShowTileBorders bool
+	ShowSprites     bool
+	//ShowBuildPreview   bool
+	//ShowDestroyPreview bool
+	ShowBuildSprites bool
 }

@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"project_m/internal/constants"
 	"project_m/internal/game/load"
 
@@ -20,24 +19,26 @@ func (g *Game) inputMouse() {
 		posX, posY := ebiten.CursorPosition()
 		tileX, tileY := g.Camera.ScreenToTile(float64(posX), float64(posY), g.Map.Tilesize)
 
-		fmt.Printf("Player Building: %+v\n", g.Player)
-		fmt.Printf("Player Building: %+v\n", g.Player.Building)
-
-		if (tileX <= 0 || tileX >= g.Map.MapSizeX) || (tileY <= 0 || tileY >= g.Map.MapSizeY) {
+		if (tileX < 0 || tileX >= g.Map.MapSizeX) || (tileY < 0 || tileY >= g.Map.MapSizeY) {
 			return
 		}
 
 		switch g.Player.Action {
 		case constants.PreviewBuilding:
-			if g.Player.CanBuild(tileX, tileY) {
+			if g.Player.CanBuild(tileX, tileY, g.Player.Building.SelectedBuildType) {
 				var build = g.Map.PutBuilding(g.Player.Building.SelectedBuildType, tileX, tileY)
 				if build == nil {
 					g.Player.StopBuilding()
-					g.RenderFlags.ShowBuildPreview = false
 					return
 				}
 				g.Player.StartBuilding(build)
-				g.RenderFlags.ShowBuildPreview = false
+			}
+			return
+		case constants.PreviewDestroying:
+			clickBuild := g.Map.Builds[tileY][tileX]
+			if g.Player.CanDestroy(clickBuild) {
+				g.Player.StartDestroying(clickBuild)
+				return
 			}
 			return
 		case constants.Idling:
@@ -45,7 +46,6 @@ func (g *Game) inputMouse() {
 
 			if clickBuild != nil && clickBuild.FinishedBuilding == false {
 				g.Player.StartBuilding(clickBuild)
-				g.RenderFlags.ShowBuildPreview = false
 				return
 			}
 
@@ -59,6 +59,7 @@ func (g *Game) inputMouse() {
 			}
 			return
 		}
+
 	}
 }
 
@@ -85,23 +86,15 @@ func (g *Game) inputPlayer() {
 
 	// actions
 	if inpututil.IsKeyJustPressed(ebiten.KeyB) {
-		if g.Player.Action == constants.Idling {
-			g.Player.Action = constants.PreviewBuilding
-			g.RenderFlags.ShowBuildPreview = true
-		} else if g.Player.Action == constants.PreviewBuilding {
-			g.Player.Action = constants.Idling
-			g.RenderFlags.ShowBuildPreview = false
-		}
+		g.Player.TogglePreview(constants.PreviewBuilding)
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyC) {
-		if g.Player.Action == constants.Idling {
-			g.Player.Action = constants.PreviewDestroying
-			g.RenderFlags.ShowDestroyPreview = true
-		} else if g.Player.Action == constants.PreviewDestroying {
-			g.Player.Action = constants.Idling
-			g.RenderFlags.ShowDestroyPreview = false
-		}
+		g.Player.TogglePreview(constants.PreviewDestroying)
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
+		g.Player.StopAllActions()
 	}
 
 	// debug

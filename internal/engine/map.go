@@ -86,6 +86,24 @@ func (m *Map) GenerateMap(priorities map[*AutoGenerateTile]float32) {
 	}
 }
 
+func (m *Map) Update() {
+	// verifica por construções com flag destroyed = true para serem removidas
+	for i := len(m.BuildsList) - 1; i >= 0; i-- {
+		v := m.BuildsList[i]
+		if v.Destroyed {
+			m.BuildsList[i] = m.BuildsList[len(m.BuildsList)-1]
+			m.BuildsList[len(m.BuildsList)-1] = nil
+			m.BuildsList = m.BuildsList[:len(m.BuildsList)-1]
+
+			for y := v.TileY; y < v.TileY+v.BuildType.SizeY; y++ {
+				for x := v.TileX; x < v.TileX+v.BuildType.SizeX; x++ {
+					m.Builds[y][x] = nil
+				}
+			}
+		}
+	}
+}
+
 func (m *Map) PutTile(tile *Tile, x, y int) {
 	if x < 0 || x >= m.MapSizeX || y < 0 || y >= m.MapSizeY {
 		return
@@ -94,7 +112,7 @@ func (m *Map) PutTile(tile *Tile, x, y int) {
 }
 
 func (m *Map) PutBuilding(buildType *BuildType, x, y int) *Build {
-	if x < 0 || x >= m.MapSizeX || y < 0 || y >= m.MapSizeY {
+	if x < 0 || x+buildType.SizeX > m.MapSizeX || y < 0 || y+buildType.SizeY > m.MapSizeY {
 		return nil
 	}
 
