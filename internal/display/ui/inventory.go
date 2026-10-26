@@ -103,7 +103,7 @@ func (ui *InventoryUI) Draw(screen *ebiten.Image) {
 		spriteX := ui.StartX + float64(index%9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dx()))
 		spriteY := ui.StartY + float64(index/9)*(float64(ui.Spacing)+float64(ui.SpriteSlot.Image.Bounds().Dy()))
 
-		sprite.Draw(screen, spriteX, spriteY, 1.0, 1.0)
+		sprite.Draw(screen, spriteX, spriteY, 1.0, 1.0, 1)
 
 		if item.Item != nil {
 
@@ -111,7 +111,7 @@ func (ui *InventoryUI) Draw(screen *ebiten.Image) {
 			itemSpriteX := spriteX + float64(ui.SpriteSlot.Image.Bounds().Dx()-32)/2
 			itemSpriteY := spriteY + float64(ui.SpriteSlot.Image.Bounds().Dy()-32)/2
 
-			itemSprite.Draw(screen, itemSpriteX, itemSpriteY, 1.0, 1.0)
+			itemSprite.Draw(screen, itemSpriteX, itemSpriteY, 1.0, 1.0, 1.0)
 
 			engine.DrawText(screen, ui.Font, fmt.Sprintf("%d", item.Quantity), float64(int(spriteX+10)), float64(int(spriteY+6)), 12, color.White)
 

@@ -5,10 +5,11 @@ import (
 )
 
 type Sprite struct {
-	ID             string
-	Name           string
-	Image          *ebiten.Image
-	Alpha          float32
+	ID     string
+	Name   string
+	Image  *ebiten.Image
+	Alpha  float32
+	drawOp ebiten.DrawImageOptions
 }
 
 func NewSprite(id, name string, image *ebiten.Image) *Sprite {
@@ -17,6 +18,7 @@ func NewSprite(id, name string, image *ebiten.Image) *Sprite {
 		Name:   name,
 		Image:  image,
 		Alpha:  1.0,
+		drawOp: ebiten.DrawImageOptions{},
 	}
 }
 
@@ -26,21 +28,19 @@ func (s *Sprite) Instantiate() *Sprite {
 	return &newSprite
 }
 
-func (s *Sprite) SetAlpha(alpha float32) {
-	s.Alpha = alpha
-}
-
-func (s *Sprite) Draw(screen *ebiten.Image, x, y float64, scaleX, scaleY float64, ) {
+func (s *Sprite) Draw(screen *ebiten.Image, x, y float64, scaleX, scaleY float64, alpha float32) {
 	if s == nil || s.Image == nil || screen == nil {
 		return
 	}
- 
-	op := &ebiten.DrawImageOptions{}
-	op.ColorScale.ScaleAlpha(s.Alpha)
-	op.GeoM.Scale(scaleX, scaleY)
 
-	op.GeoM.Translate(x, y)
-	screen.DrawImage(s.Image, op)
+	s.drawOp.GeoM.Reset()
+	s.drawOp.ColorScale.Reset()
+
+	s.drawOp.ColorScale.ScaleAlpha(alpha)
+	s.drawOp.GeoM.Scale(scaleX, scaleY)
+
+	s.drawOp.GeoM.Translate(x, y)
+	screen.DrawImage(s.Image, &s.drawOp)
 }
 
 type SpriteManager struct {

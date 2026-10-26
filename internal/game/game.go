@@ -16,14 +16,14 @@ import (
 type Game struct {
 	Map *engine.Map
 
-	Camera      *engine.Camera
-	Player      *player.Player
-	InventoryUi *inventoryUi.InventoryUI
-	Entities    []*engine.Entity
-	Inputs      []ebiten.Key
+	Camera        *engine.Camera
+	Player        *player.Player
+	InventoryUi   *inventoryUi.InventoryUI
+	Entities      []*engine.Entity
+	Inputs        []ebiten.Key
+	BuildTypeList []*engine.BuildType
 
-	GameMode    GameMode
-	RenderFlags *RenderFlags
+	RenderFlags RenderFlags
 
 	ItemManager *item.ItemManager
 
@@ -32,7 +32,6 @@ type Game struct {
 	// Time
 	lastUpdate time.Time
 	deltaTime  float64
-	// Time
 }
 
 func (g *Game) CalculateDeltaTime() {
@@ -55,12 +54,13 @@ func (g *Game) Update() error {
 
 	g.HandleGameInputs()
 	g.Player.Update(g.deltaTime)
+	g.Map.Update()
 	g.Camera.Follow(g.Player.X, g.Player.Y)
 	return nil
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.HandleTileDrawStates(screen)
+	g.HandleRenderFlags(screen)
 	g.Player.Draw(screen, g.Camera)
 	g.InventoryUi.Draw(screen)
 }
@@ -75,8 +75,9 @@ func GameSetup() *Game {
 
 	game := &Game{}
 
-	game.RenderFlags = &RenderFlags{
-		ShowSprites: true,
+	game.RenderFlags = RenderFlags{
+		ShowSprites:      true,
+		ShowBuildSprites: true,
 	}
 
 	game.Camera = &engine.Camera{
@@ -87,7 +88,6 @@ func GameSetup() *Game {
 	game.InitMap()
 	game.InitPlayer()
 	game.InitUi()
-	
 
 	return game
 }
